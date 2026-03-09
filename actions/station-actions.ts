@@ -1,0 +1,58 @@
+"use server";
+
+/**
+ * Station Server Actions
+ *
+ * These actions run on the server and can be called directly from client components.
+ * They handle station operations by calling domain methods.
+ */
+
+import { HMILocator } from "@/lib/hmi-locator";
+import { StationMode } from "@/types/station.types";
+
+/**
+ * Set the station mode
+ * @param stationId - The ID of the station
+ * @param mode - The mode to set (auto, setup, init, end, home, or error)
+ */
+export async function setStationMode(stationId: string, mode: StationMode) {
+  // Validate mode
+  if (!["auto", "setup", "init", "end", "home", "error"].includes(mode)) {
+    return { success: false, error: "Invalid mode. Must be: auto, setup, init, end, home, or error" };
+  }
+
+  try {
+    const station = HMILocator.getStation(stationId);
+    if (!station) {
+      return { success: false, error: `Station ${stationId} not found` };
+    }
+
+    await station.setMode(mode);
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[Station Mode Action] Failed for ${stationId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Reset station statistics
+ * @param stationId - The ID of the station
+ * Clears all production counters and statistics for the station
+ */
+export async function resetStationStatistics(stationId: string) {
+  try {
+    const station = HMILocator.getStation(stationId);
+    if (!station) {
+      return { success: false, error: `Station ${stationId} not found` };
+    }
+
+    await station.resetStatistics();
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[Station Reset Statistics Action] Failed for ${stationId}:`, error);
+    return { success: false, error: message };
+  }
+}
