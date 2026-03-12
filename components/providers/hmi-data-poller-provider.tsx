@@ -1,9 +1,12 @@
 /**
  * HMI Data Poller Provider
  *
- * Handles polling of HMI data from the server.
- * This provider runs only ONCE in the app tree, ensuring a single polling interval.
- * Components consume the data through HMIDataContext without triggering additional polls.
+ * DISABLED: SSE (Server-Sent Events) is now used for real-time updates instead of polling.
+ * This provider is kept as a fallback if SSE fails.
+ *
+ * To re-enable polling:
+ * 1. Uncomment the useEffect below
+ * 2. Remove the HMIDataProvider's useHMISSE() call
  */
 
 "use client";
@@ -58,35 +61,38 @@ export function HMIDataPollerProvider({ children }: HMIDataPollerProviderProps) 
 
   /**
    * Set up polling when initialized and connected
+   *
+   * DISABLED: SSE is now used for real-time updates.
+   * Re-enable this useEffect if SSE fails and you need polling fallback.
    */
-  useEffect(() => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    // Only poll when initialized and connected
-    if (!isInitialized || !isConnected) {
-      return;
-    }
-
-    // Start polling every HMI_DATA_REFRESH_INTERVAL
-    intervalRef.current = setInterval(() => {
-      refreshData();
-    }, HMI_DATA_REFRESH_INTERVAL);
-
-    // Initial fetch
-    refreshData();
-
-    // Cleanup on unmount or when conditions change
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [isInitialized, isConnected]);
+  // useEffect(() => {
+  //   // Clear any existing interval
+  //   if (intervalRef.current) {
+  //     clearInterval(intervalRef.current);
+  //     intervalRef.current = null;
+  //   }
+  //
+  //   // Only poll when initialized and connected
+  //   if (!isInitialized || !isConnected) {
+  //     return;
+  //   }
+  //
+  //   // Start polling every HMI_DATA_REFRESH_INTERVAL
+  //   intervalRef.current = setInterval(() => {
+  //     refreshData();
+  //   }, HMI_DATA_REFRESH_INTERVAL);
+  //
+  //   // Initial fetch
+  //   refreshData();
+  //
+  //   // Cleanup on unmount or when conditions change
+  //   return () => {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //       intervalRef.current = null;
+  //     }
+  //   };
+  // }, [isInitialized, isConnected]);
 
   return <>{children}</>;
 }

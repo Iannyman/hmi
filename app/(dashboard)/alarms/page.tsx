@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { AlarmPanel } from "@/components/panels/alarm-panel";
 import { getAlarms, acknowledgeAlarm as acknowledgeAlarmAction, acknowledgeAllAlarms, clearAlarmHistory } from "@/actions/alarm-actions";
 import { Alarm } from "@/types/alarm.types";
-import { AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, WifiOff } from "lucide-react";
+import { useConnection } from "@/hooks/use-connection";
+import { Card } from "@/components/ui/card";
 
 // Polling interval for alarms page (ms)
 const ALARM_POLL_INTERVAL = 2000;
@@ -12,6 +14,9 @@ const ALARM_POLL_INTERVAL = 2000;
 export default function AlarmsPage() {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
+  const { isConnected } = useConnection();
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch alarms from Server Action
   const fetchAlarms = useCallback(async () => {
@@ -19,8 +24,14 @@ export default function AlarmsPage() {
       const result = await getAlarms();
       if (result.success && result.data) {
         setAlarms(result.data);
+        setInitError(null); // Clear error on successful fetch
       } else {
-        console.error("Failed to fetch alarms:", result.error);
+        // Check if error is due to uninitialized system
+        if (result.error === "Alarm Manager not initialized") {
+          setInitError("Alarm system not initialized. Please connect to OPC UA server.");
+        } else {
+          console.error("Failed to fetch alarms:", result.error);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch alarms:", error);
@@ -29,13 +40,30 @@ export default function AlarmsPage() {
     }
   }, []);
 
-  // Initial fetch and set up polling
+  // Set up polling - only when connected
   useEffect(() => {
-    fetchAlarms();
+    // Clear any existing interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
 
-    const interval = setInterval(fetchAlarms, ALARM_POLL_INTERVAL);
-    return () => clearInterval(interval);
-  }, [fetchAlarms]);
+    // Only poll when connected to OPC UA
+    if (isConnected) {
+      fetchAlarms(); // Initial fetch
+      pollIntervalRef.current = setInterval(fetchAlarms, ALARM_POLL_INTERVAL);
+    } else {
+      // Not connected - set error state
+      setInitError("No OPC UA connection. Please wait for connection to be established.");
+      setIsLoading(false);
+    }
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+    };
+  }, [isConnected, fetchAlarms]);
 
   // Handle acknowledge
   const handleAcknowledge = useCallback(async (alarmId: string) => {
@@ -78,12 +106,43 @@ export default function AlarmsPage() {
   const infoAlarms = alarms.filter((a) => a.severity === "info");
   const activeAlarms = alarms.filter((a) => !a.acknowledged);
 
+  // Sort alarms by timestamp (newest first) for history display
+  const sortedAlarms = [...alarms].sort((a, b) => {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
+  // Show connection error state
+  if (initError) {
+    return (
+      <div className="p-6">
+        {/* Page header */}
+        <div className="mb-6 pb-4 border-b border-[hsl(var(--border))]">
+          <h1 className="text-2xl font-semibold tracking-tight">ALARMS</h1>
+          <p className="text-[hsl(var(--text-muted))] text-sm mt-1">View and manage system alarms and alerts</p>
+        </div>
+
+        {/* Error state */}
+        <Card className="p-12 text-center border-[hsl(var(--status-error))] bg-[hsl(var(--status-error))/5]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-[hsl(var(--status-error))/10]">
+              <WifiOff className="w-8 h-8 text-[hsl(var(--status-error))]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[hsl(var(--status-error))]">No Connection</h2>
+              <p className="text-sm text-[hsl(var(--text-muted))] mt-1">{initError}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       {/* Page header */}
-      <div className="mb-6 pb-4 border-b border-gray-800">
+      <div className="mb-6 pb-4 border-b border-[hsl(var(--border))]">
         <h1 className="text-2xl font-semibold tracking-tight">ALARMS</h1>
-        <p className="text-gray-500 text-sm mt-1">View and manage system alarms and alerts</p>
+        <p className="text-[hsl(var(--text-muted))] text-sm mt-1">View and manage system alarms and alerts</p>
       </div>
 
       {/* Statistics */}
@@ -160,7 +219,7 @@ export default function AlarmsPage() {
           </div>
         ) : (
           <AlarmPanel
-            alarms={alarms}
+            alarms={sortedAlarms}
             onAcknowledge={handleAcknowledge}
             onClearHistory={handleClearHistory}
             onClear={(id) => console.log("Clear alarm:", id)}

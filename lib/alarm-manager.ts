@@ -3,6 +3,10 @@
  *
  * Central manager for handling alarm generation from device errors.
  * Listens to device error events and creates Alarm objects dynamically.
+ *
+ * Error detection is now handled by a global OPC UA subscription to device
+ * error messages (sErrorMessage), managed by HMIManager. This ensures alarms
+ * are detected regardless of which page the user is viewing.
  */
 
 import { EventEmitter } from "events";
@@ -77,15 +81,18 @@ export class AlarmManager extends EventEmitter {
 
       for (const device of devices) {
         // Check if this is a Cylinder and has an error
-        if (device.type === "cylinder" && device.errorMessage && device.errorMessage !== "") {
-          const errorData: DeviceErrorEvent = {
-            stationId: station.id,
-            deviceId: device.id,
-            deviceName: (device as any).getName?.() || device.id,
-            errorMessage: device.errorMessage,
-          };
-          this.createAlarm(errorData);
-          foundErrors++;
+        if (device.type === "cylinder") {
+          const cylinder = device as any; // Cast to access cylinder-specific properties
+          if (cylinder.errorMessage && cylinder.errorMessage !== "") {
+            const errorData: DeviceErrorEvent = {
+              stationId: station.id,
+              deviceId: device.id,
+              deviceName: (device as any).getName?.() || device.id,
+              errorMessage: cylinder.errorMessage,
+            };
+            this.createAlarm(errorData);
+            foundErrors++;
+          }
         }
       }
     }
@@ -115,6 +122,9 @@ export class AlarmManager extends EventEmitter {
    */
   private setupDeviceErrorListener(stationId: string, device: any): void {
     // Listen to error events from device
+    // These events are emitted when:
+    // 1. Device is subscribed and updateStatus() detects an error change
+    // 2. Global error message subscription triggers updateStatus()
     device.on("error", (errorData: DeviceErrorEvent) => {
       console.log(`[AlarmManager] Error received from ${errorData.deviceId}:`, errorData.errorMessage);
       this.createAlarm(errorData);

@@ -1,127 +1,114 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useOPCUA } from "./use-opcua";
-import { useOPCUAData } from "@/components/providers/opcua-data-provider";
-import { RouteSubscriptionConfig } from "@/types/opcua.types";
-
-// Default subscription configurations for each route
-export const ROUTE_SUBSCRIPTIONS: RouteSubscriptionConfig[] = [
-  {
-    route: "/dashboard",
-    nodePaths: ["Line", "Order", "Stations.Control"],
-    description: "Line status, Order info, and all station controls"
-  },
-  {
-    route: "/devices",
-    nodePaths: ["Stations"], // All station devices
-    description: "All station devices and their values"
-  },
-  {
-    route: "/alarms",
-    nodePaths: ["Alarms"],
-    description: "Alarm notifications and status"
-  },
-  {
-    route: "/trends",
-    nodePaths: ["Line", "Stations"],
-    description: "Line and station data for trend analysis"
-  },
-  {
-    route: "/settings",
-    nodePaths: ["Settings"],
-    description: "System settings"
-  }
-];
+import { useEffect, useRef, useState } from "react";
+import { useHMIDataContext } from "@/components/providers/hmi-data-provider";
 
 /**
  * Hook for managing OPC UA subscriptions based on current route
- * 
- * Note: This hook is currently disabled. The subscription logic is commented out
- * because it requires the OPC UA server to be browsed first to collect node IDs.
- * Use the "Dynamic Browse" feature in the OPC UA Demo page to load data from
- * the server first, then subscriptions can be enabled.
+ *
+ * This hook implements route-based lazy subscriptions:
+ * - Dashboard: Line + Order + Stations.Control data only
+ * - Devices: Devices for the specific station being viewed
+ *
+ * When the route changes, it automatically unsubscribes from the previous
+ * route's nodes and subscribes to the new route's nodes.
+ *
+ * @param currentRoute - The current route path
+ * @param stationId - Optional station ID (required for /devices route)
  */
-export function useOPCUASubscription(currentRoute: string) {
-  const { isConnected, subscribe, unsubscribe } = useOPCUA();
-  const { opcuaMockData } = useOPCUAData();
-  
-  // Track current subscription to avoid duplicate subscriptions
-  const currentSubscriptionRef = useRef<string | null>(null);
-  const subscribedNodeIdsRef = useRef<Set<string>>(new Set());
+export function useOPCUASubscription(currentRoute: string, stationId?: string) {
+  const { isInitialized } = useHMIDataContext();
 
-  // Handle subscription updates
-  const handleSubscriptionUpdate = (data: { 
-    nodeId: string; 
-    value: unknown; 
-    statusCode: string; 
-    sourceTimestamp?: Date; 
-    serverTimestamp?: Date 
-  }) => {
-    console.log(`Subscription update: ${data.nodeId} = ${data.value}`);
-    // The OPCUADataProvider will handle updating mock data
-  };
+  // Track current subscription state
+  const [subscribedNodeIds, setSubscribedNodeIds] = useState<string[]>([]);
+  const [currentSubscription, setCurrentSubscription] = useState<string | null>(null);
+
+  // Store previous route for cleanup comparison
+  const prevRouteRef = useRef<string | null>(null);
+  const prevStationIdRef = useRef<string | null>(null);
+  const isLoadingRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    // Don't subscribe until HMI Manager is initialized
+    if (!isInitialized) {
+      console.log("[useOPCUASubscription] Waiting for HMI initialization...");
+      return;
+    }
+
+    // Skip if already processing this exact route/station
+    const subscriptionKey = `${currentRoute}:${stationId || "none"}`;
+    if (currentSubscription === subscriptionKey || isLoadingRef.current) {
+      return;
+    }
+
+    // Subscribe to the route
+    const subscribeToRoute = async () => {
+      isLoadingRef.current = true;
+      try {
+        console.log(`[useOPCUASubscription] Subscribing to route: ${currentRoute}${stationId ? ` (${stationId})` : ""}`);
+
+        const response = await fetch("/api/hmi/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ route: currentRoute, stationId }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log(`[useOPCUASubscription] Successfully subscribed to: ${currentRoute}${stationId ? ` (${stationId})` : ""}`);
+
+          // Update subscription state
+          setCurrentSubscription(subscriptionKey);
+
+          // Set subscribed node IDs based on route
+          if (currentRoute === "/dashboard") {
+            // Dashboard: Line + all Stations.Control
+            setSubscribedNodeIds([
+              "Line.sName",
+              "Line.sInStatus",
+              "Line.iMode",
+              "Line.dPartsOK",
+              "Line.dPartsNOK",
+              "All Stations.Control.*",
+            ]);
+          } else if (currentRoute === "/devices" && stationId) {
+            // Devices: specific station's devices
+            setSubscribedNodeIds([`${stationId}.* (all devices)`]);
+          } else {
+            setSubscribedNodeIds([]);
+          }
+        } else {
+          console.error("[useOPCUASubscription] Failed to subscribe:", result.error);
+        }
+      } catch (error) {
+        console.error("[useOPCUASubscription] Failed to subscribe to route:", error);
+      } finally {
+        isLoadingRef.current = false;
+      }
+    };
+
+    subscribeToRoute();
+
+    // Store current route for next cleanup
+    prevRouteRef.current = currentRoute;
+    prevStationIdRef.current = stationId || null;
+  }, [currentRoute, stationId, currentSubscription, isInitialized]);
+
+  // Cleanup on unmount - unsubscribe from devices if on devices page
+  useEffect(() => {
+    return () => {
+      if (prevRouteRef.current === "/devices" && prevStationIdRef.current) {
+        console.log("[useOPCUASubscription] Cleaning up device subscriptions on unmount");
+        // Note: The server-side HMI Manager will handle cleanup when the next
+        // route subscription comes in, so we don't need to explicitly call
+        // unsubscribe here
+      }
+    };
+  }, []);
 
   return {
-    subscribedNodeIds: Array.from(subscribedNodeIdsRef.current),
-    currentSubscription: currentSubscriptionRef.current
+    subscribedNodeIds,
+    currentSubscription,
   };
-}
-
-/**
- * Helper function to collect node IDs by paths
- * 
- * This function traverses the mock data structure to find node IDs
- * corresponding to the specified paths (e.g., "Line", "Order", "Stations.Control")
- */
-export function collectNodeIdsByPaths(
-  opcuaMockData: { stations: any[] } | null,
-  paths: string[]
-): string[] {
-  const nodeIds: string[] = [];
-
-  if (!opcuaMockData) {
-    return nodeIds;
-  }
-
-  for (const path of paths) {
-    if (path === "Line") {
-      // Add Line node ID if available
-      // This would come from browsing structure
-      console.log("Collecting Line nodes...");
-    } else if (path === "Order") {
-      // Add Order node ID if available
-      console.log("Collecting Order nodes...");
-    } else if (path === "Stations.Control") {
-      // Collect all Station.Control node IDs
-      for (const station of opcuaMockData.stations) {
-        // Find Control children in station
-        const controlNode = station.nodeId; // This would be station's Control node
-        if (controlNode) {
-          nodeIds.push(controlNode);
-        }
-      }
-    } else if (path === "Stations") {
-      // Collect all station node IDs and their devices
-      for (const station of opcuaMockData.stations) {
-        nodeIds.push(station.nodeId);
-        for (const device of station.devices) {
-          // Add device variable node IDs
-          Object.values(device.values).forEach(value => {
-            if (typeof value === "string" && value.startsWith("ns=")) {
-              nodeIds.push(value);
-            }
-          });
-        }
-      }
-    } else if (path === "Alarms") {
-      // Collect alarm node IDs
-      console.log("Collecting Alarm nodes...");
-    } else if (path === "Settings") {
-      // Collect settings node IDs
-      console.log("Collecting Settings nodes...");
-    }
-  }
-
-  return nodeIds;
 }

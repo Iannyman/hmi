@@ -9,13 +9,14 @@ import { DriveCard } from "@/components/devices/drive-card";
 import { CylinderCard } from "@/components/devices/cylinder-card";
 import { resetStationStatistics } from "@/actions/station-actions";
 import { useState, Suspense, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { useConnection } from "@/hooks/use-connection";
 import { useHMIManager } from "@/hooks/use-hmi-manager";
+import { useOPCUASubscription } from "@/hooks/use-opcua-subscription";
 import { DeviceStatus } from "@/types/device.types";
 import { DeviceType } from "@/types/device.types";
 import { DeviceDTO } from "@/types/device.dto";
@@ -26,10 +27,14 @@ type FilterStatus = "all" | DeviceStatus | "initializing";
 
 function DevicesContent() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const stationId = searchParams.get("station");
   const { getStation, stations, isInitialized } = useHMIManager();
   const hmiStation = getStation(stationId || "");
   const { isConnected } = useConnection();
+
+  // Subscribe to devices for this station
+  useOPCUASubscription(pathname, stationId || undefined);
 
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");

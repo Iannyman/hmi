@@ -128,8 +128,6 @@ export function AlarmPanel({
                         <div className="flex items-center gap-3 mt-2.5 text-xs text-[hsl(var(--text-dim))]">
                           <Clock className="w-3.5 h-3.5" />
                           <span className="font-mono">{alarm.timestamp}</span>
-                          <span className="text-[hsl(var(--border-strong))]">•</span>
-                          <span>{alarm.device}</span>
                         </div>
                       </div>
                     </div>

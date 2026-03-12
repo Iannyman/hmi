@@ -18,6 +18,10 @@ export class HMIManager extends EventEmitter {
   private stations: Map<string, Station> = new Map();
   private isInitialized: boolean = false;
 
+  // Route-based subscription state
+  private currentRoute: string | null = null;
+  private currentStationId: string | null = null;
+
   constructor(nodeMapper: NodeMapper, opcuaService: any) {
     super();
     this.nodeMapper = nodeMapper;
@@ -74,14 +78,14 @@ export class HMIManager extends EventEmitter {
     });
     // console.log("[HMI Manager] Line subscription created successfully");
 
-    // Step 5: Subscribe to all Station updates
+    // Step 5: Subscribe to all Station Control data (not devices)
     for (const station of this.stations.values()) {
-      // console.log(`[HMI Manager] Subscribing to Station ${station.id} updates...`);
+      // console.log(`[HMI Manager] Subscribing to Station ${station.id} Control data...`);
       await station.subscribe((updatedStation) => {
         // console.log(`[HMI Manager] Station ${updatedStation.id} update received`);
         this.emit("station:updated", updatedStation);
-      });
-      // console.log(`[HMI Manager] Station ${station.id} subscription created successfully`);
+      }, false); // includeDevices = false for Control-only subscription
+      // console.log(`[HMI Manager] Station ${station.id} Control subscription created successfully`);
     }
 
     // Step 6: Subscribe to device updates
@@ -89,15 +93,20 @@ export class HMIManager extends EventEmitter {
       station.onDeviceAdded((device) => {
         this.emit("device:added", { stationId: station.id, device });
       });
-      
+
       station.onDeviceRemoved((device) => {
         this.emit("device:removed", { stationId: station.id, device });
       });
-      
+
       station.onDeviceUpdated((device) => {
         this.emit("device:updated", { stationId: station.id, device });
       });
     }
+
+    // Step 7: Subscribe to device error messages globally (for alarm detection)
+    // This ensures alarms are detected regardless of which page the user is on
+    console.log("[HMI Manager] Subscribing to device error messages globally...");
+    await this.subscribeToDeviceErrorMessages();
 
     this.isInitialized = true;
     console.log("HMI Manager initialized successfully");
@@ -249,6 +258,93 @@ export class HMIManager extends EventEmitter {
   }
 
   /**
+   * Subscribe to route-specific nodes
+   * This implements route-based lazy subscriptions for optimal performance
+   *
+   * @param route - The current route (e.g., "/dashboard", "/devices")
+   * @param stationId - Optional station ID for device-specific subscriptions
+   */
+  async subscribeToRoute(route: string, stationId?: string): Promise<void> {
+    if (!this.isInitialized) {
+      console.log("[HMI Manager] Cannot subscribe to route - not initialized");
+      return;
+    }
+
+    // Skip if already subscribed to this route
+    if (this.currentRoute === route && this.currentStationId === (stationId || null)) {
+      console.log(`[HMI Manager] Already subscribed to route: ${route}${stationId ? ` (${stationId})` : ""}`);
+      return;
+    }
+
+    console.log(`[HMI Manager] Subscribing to route: ${route}${stationId ? ` (${stationId})` : ""}`);
+
+    // Clean up previous device subscriptions if any
+    await this.unsubscribeFromDevices();
+
+    // Update current route state
+    this.currentRoute = route;
+    this.currentStationId = stationId || null;
+
+    // Route-specific subscription logic
+    if (route === "/dashboard") {
+      // Dashboard: Line + Stations.Control already subscribed during initialization
+      // No additional subscriptions needed
+      console.log("[HMI Manager] Dashboard route - using existing Control subscriptions");
+    } else if (route === "/devices" && stationId) {
+      // Devices page: Subscribe to devices for the specific station
+      const station = this.stations.get(stationId);
+      if (station) {
+        console.log(`[HMI Manager] Subscribing to devices for station: ${stationId}`);
+        await station.subscribeToDevices((updatedStation) => {
+          this.emit("station:updated", updatedStation);
+        });
+        console.log(`[HMI Manager] Device subscription created for: ${stationId}`);
+      } else {
+        console.warn(`[HMI Manager] Station not found: ${stationId}`);
+      }
+    } else {
+      console.log(`[HMI Manager] Unknown route or missing stationId: ${route}`);
+    }
+
+    this.emit("route:subscribed", { route, stationId });
+  }
+
+  /**
+   * Unsubscribe from device subscriptions
+   * Keeps Control data subscriptions active
+   *
+   * @param stationId - Optional station ID to unsubscribe from specific station's devices
+   */
+  async unsubscribeFromDevices(stationId?: string): Promise<void> {
+    console.log(`[HMI Manager] Unsubscribing from devices${stationId ? ` (${stationId})` : ""}`);
+
+    if (stationId) {
+      // Unsubscribe from specific station's devices
+      const station = this.stations.get(stationId);
+      if (station) {
+        await station.unsubscribeFromDevices();
+      }
+    } else {
+      // Unsubscribe from all devices
+      for (const station of this.stations.values()) {
+        await station.unsubscribeFromDevices();
+      }
+    }
+
+    this.emit("devices:unsubscribed", { stationId });
+  }
+
+  /**
+   * Get current route subscription state
+   */
+  getCurrentRoute(): { route: string | null; stationId: string | null } {
+    return {
+      route: this.currentRoute,
+      stationId: this.currentStationId,
+    };
+  }
+
+  /**
    * Get device type from device ID
    */
   private getDeviceType(deviceId: string): "cylinder" | "motor" | "valve" | "sensor" | "robot" | "conveyor" | "drive" {
@@ -356,5 +452,55 @@ export class HMIManager extends EventEmitter {
    */
   offStructureChanged(callback: (changes: StructureChange[]) => void): void {
     this.off("structure:changed", callback);
+  }
+
+  /**
+   * Subscribe to device error messages globally
+   * This ensures alarm detection works regardless of current route
+   * Subscribes only to xErrorMessage nodes for cylinders (lightweight)
+   */
+  private async subscribeToDeviceErrorMessages(): Promise<void> {
+    const errorNodeIds: string[] = [];
+    const errorNodeToDeviceMap: Map<string, { stationId: string; device: any }> = new Map();
+
+    // Collect all error message node IDs from cylinders
+    for (const station of this.stations.values()) {
+      const devices = station.getDevices();
+      for (const device of devices) {
+        if (device.type === "cylinder") {
+          const errorNodeId = this.nodeMapper.getNodeId(`${station.id}.${device.id}.sErrorMessage`);
+          errorNodeIds.push(errorNodeId);
+          errorNodeToDeviceMap.set(errorNodeId, { stationId: station.id, device });
+        }
+      }
+    }
+
+    if (errorNodeIds.length === 0) {
+      console.log("[HMI Manager] No cylinder devices found for error monitoring");
+      return;
+    }
+
+    // Create subscription for all error messages
+    const subscriptionId = await this.opcuaService.subscribe(
+      errorNodeIds,
+      (dataValue: any) => {
+        const nodeId = dataValue.nodeId?.toString();
+        const value = dataValue.value?.value;
+
+        const mapped = errorNodeToDeviceMap.get(nodeId);
+        if (mapped) {
+          const { stationId, device } = mapped;
+          // Update the device's errorMessage directly
+          (device as any).errorMessage = value || "";
+
+          // Trigger error handling by calling updateStatus if it's a cylinder
+          if (typeof (device as any).updateStatus === "function") {
+            (device as any).updateStatus();
+          }
+        }
+      }
+    );
+
+    console.log(`[HMI Manager] Subscribed to ${errorNodeIds.length} device error message nodes`);
   }
 }

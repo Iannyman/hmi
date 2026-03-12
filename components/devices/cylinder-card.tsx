@@ -43,15 +43,15 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
   const name = getName(cylinder.details);
   const labelHP = getLabelHP(cylinder.details);
   const labelWP = getLabelWP(cylinder.details);
-  const hasError = cylinder.errorMessage !== '';
+  const hasError = Boolean(cylinder.errorMessage);
 
-  // Local state for timeout input
-  const [timeoutValue, setTimeoutValue] = useState(cylinder.timeout);
+  // Local state for timeout input (use 0 as default if undefined)
+  const [timeoutValue, setTimeoutValue] = useState(cylinder.timeout ?? 0);
   const timeoutDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync timeout when cylinder data changes
   useEffect(() => {
-    setTimeoutValue(cylinder.timeout);
+    setTimeoutValue(cylinder.timeout ?? 0);
   }, [cylinder.timeout]);
 
   // Debounced timeout change handler

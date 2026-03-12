@@ -9,6 +9,7 @@ import { AlarmNotificationWrapper } from "@/components/providers/alarm-notificat
 import { OPCUADataProvider } from "@/components/providers/opcua-data-provider";
 import { HMIInitializerProvider } from "@/components/providers/hmi-initializer-provider";
 import { HMIDataProvider } from "@/components/providers/hmi-data-provider";
+import { HMISSEProvider } from "@/components/providers/hmi-sse-provider";
 import { HMIDataPollerProvider } from "@/components/providers/hmi-data-poller-provider";
 import { ConnectionProvider } from "@/hooks/use-connection";
 
@@ -50,19 +51,21 @@ export default function RootLayout({
           <ConnectionProvider>
             <OPCUADataProvider>
             <HMIDataProvider>
-              <HMIDataPollerProvider>
-                <HMIInitializerProvider>
-                  <SidebarProvider>
-                    <LineStatusProvider>
-                      <LineStatisticsProvider>
-                        <AlarmNotificationWrapper>
-                          {children}
-                        </AlarmNotificationWrapper>
-                      </LineStatisticsProvider>
-                    </LineStatusProvider>
-                  </SidebarProvider>
-                </HMIInitializerProvider>
-              </HMIDataPollerProvider>
+              <HMISSEProvider>
+                <HMIDataPollerProvider>
+                  <HMIInitializerProvider>
+                    <SidebarProvider>
+                      <LineStatusProvider>
+                        <LineStatisticsProvider>
+                          <AlarmNotificationWrapper>
+                            {children}
+                          </AlarmNotificationWrapper>
+                        </LineStatisticsProvider>
+                      </LineStatusProvider>
+                    </SidebarProvider>
+                  </HMIInitializerProvider>
+                </HMIDataPollerProvider>
+              </HMISSEProvider>
             </HMIDataProvider>
           </OPCUADataProvider>
           </ConnectionProvider>

@@ -63,8 +63,10 @@ export class Station extends EventEmitter implements DomainObject {
   /**
    * Subscribe to all Station OPCUA nodes for real-time updates
    * Called when component mounts
+   * @param callback - Function to call when station data updates
+   * @param includeDevices - Whether to also subscribe to device updates (default: false)
    */
-  async subscribe(callback: (station: Station) => void): Promise<void> {
+  async subscribe(callback: (station: Station) => void, includeDevices: boolean = false): Promise<void> {
     // console.log(`[Station ${this.id}] Starting subscription...`);
 
     // Step 1: Get node IDs (cache them)
@@ -135,12 +137,14 @@ export class Station extends EventEmitter implements DomainObject {
 
     // console.log(`[Station ${this.id}] Subscription created with ID: ${this.subscriptionId}`);
 
-    // Step 3: Subscribe to all devices
-    for (const device of this.devices.values()) {
-      await device.subscribe((device: Device) => {
-        this.emit("deviceUpdated", device);
-        callback(this);
-      });
+    // Step 3: Subscribe to all devices (only if includeDevices is true)
+    if (includeDevices) {
+      for (const device of this.devices.values()) {
+        await device.subscribe((device: Device) => {
+          this.emit("deviceUpdated", device);
+          callback(this);
+        });
+      }
     }
 
     // Step 4: Initial refresh to get current values
@@ -160,6 +164,34 @@ export class Station extends EventEmitter implements DomainObject {
     for (const device of this.devices.values()) {
       await device.unsubscribe();
     }
+  }
+
+  /**
+   * Unsubscribe from device subscriptions only
+   * Keeps control data subscription active
+   */
+  async unsubscribeFromDevices(): Promise<void> {
+    for (const device of this.devices.values()) {
+      await device.unsubscribe();
+    }
+  }
+
+  /**
+   * Subscribe to device updates only
+   * Use this when navigating to a devices page for a specific station
+   * Uses batch subscription (Promise.all) for optimal performance
+   */
+  async subscribeToDevices(callback: (station: Station) => void): Promise<void> {
+    // Batch subscribe all devices in parallel
+    const subscribePromises = Array.from(this.devices.values()).map((device) =>
+      device.subscribe((device: Device) => {
+        this.emit("deviceUpdated", device);
+        callback(this);
+      })
+    );
+
+    await Promise.all(subscribePromises);
+    console.log(`[Station ${this.id}] Subscribed to ${subscribePromises.length} devices in batch`);
   }
 
   /**

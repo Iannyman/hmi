@@ -1,6 +1,13 @@
+/**
+ * Alarm Notification Wrapper
+ *
+ * Provides real-time alarm notifications using SSE (Server-Sent Events)
+ * instead of polling. Listens for alarm events dispatched by HMISSEProvider.
+ */
+
 "use client";
 
-import { ReactNode, useEffect, useState, useCallback, useRef } from "react";
+import { ReactNode, useEffect, useState, useCallback } from "react";
 import { AlarmNotificationProvider } from "@/components/providers/alarm-notification-provider";
 import { AlarmNotification } from "@/components/notifications/alarm-notification";
 import { getAlarms, acknowledgeAlarm } from "@/actions/alarm-actions";
@@ -10,66 +17,74 @@ interface AlarmNotificationWrapperProps {
   children: ReactNode;
 }
 
-// Polling interval for alarms (ms)
-const ALARM_POLL_INTERVAL = parseInt(process.env.NEXT_PUBLIC_ALARM_POLL_INTERVAL || "1000", 10);
-
 export function AlarmNotificationWrapper({ children }: AlarmNotificationWrapperProps) {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
-  const [useMockData, setUseMockData] = useState(false);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const previousAlarmIdsRef = useRef<Set<string>>(new Set());
 
-  // Fetch alarms using Server Action
+  // Fetch alarms using Server Action (initial load only)
   const fetchAlarms = useCallback(async () => {
     try {
       const result = await getAlarms();
 
       if (result.success && result.data) {
-        const fetchedAlarms = result.data;
-
-        // Check if there are new alarms (for logging)
-        const currentAlarmIds = new Set(fetchedAlarms.map((a) => a.id));
-        const newAlarms = fetchedAlarms.filter(
-          (a) => !previousAlarmIdsRef.current.has(a.id)
-        );
-
-        if (newAlarms.length > 0) {
-          console.log("[AlarmWrapper] New alarms received:", newAlarms.length);
-        }
-
-        previousAlarmIdsRef.current = currentAlarmIds;
-        setAlarms(fetchedAlarms);
-        setUseMockData(false);
+        console.log("[AlarmWrapper] Initial alarms loaded:", result.data.length);
+        setAlarms(result.data);
       } else {
-        // Server action failed, fall back to mock data
-        console.log("[AlarmWrapper] Server action not available, using mock data:", result.error);
-        setUseMockData(true);
+        console.warn("[AlarmWrapper] Failed to load alarms:", result.error);
       }
     } catch (error) {
       console.warn("[AlarmWrapper] Failed to fetch alarms:", error);
-      // Fall back to mock data on error
-      setUseMockData(true);
     }
   }, []);
 
-  // Start polling for alarms
+  // Listen for SSE alarm events instead of polling
   useEffect(() => {
-    console.log("[AlarmWrapper] Starting alarm polling...");
+    console.log("[AlarmWrapper] Listening for SSE alarm events...");
 
-    // Initial fetch
+    const handleAlarmAdded = (event: Event) => {
+      const customEvent = event as CustomEvent<Alarm>;
+      const alarm = customEvent.detail;
+      console.log("[AlarmWrapper] New alarm via SSE:", alarm.id);
+
+      // Add to alarms list if not already present
+      setAlarms((prev) => {
+        const exists = prev.some((a) => a.id === alarm.id);
+        if (!exists) {
+          return [...prev, alarm];
+        }
+        return prev;
+      });
+    };
+
+    const handleAlarmAcknowledged = (event: Event) => {
+      const customEvent = event as CustomEvent<Alarm>;
+      const alarm = customEvent.detail;
+      console.log("[AlarmWrapper] Alarm acknowledged via SSE:", alarm.id);
+
+      // Update alarm in list
+      setAlarms((prev) =>
+        prev.map((a) =>
+          a.id === alarm.id
+            ? {
+                ...a,
+                acknowledged: true,
+                acknowledgedBy: alarm.acknowledgedBy,
+                acknowledgedAt: alarm.acknowledgedAt,
+              }
+            : a
+        )
+      );
+    };
+
+    // Listen for custom events dispatched by HMISSEProvider
+    window.addEventListener("alarm:added", handleAlarmAdded);
+    window.addEventListener("alarm:acknowledged", handleAlarmAcknowledged);
+
+    // Also fetch initial alarms on mount
     fetchAlarms();
 
-    // Set up polling
-    pollIntervalRef.current = setInterval(() => {
-      fetchAlarms();
-    }, ALARM_POLL_INTERVAL);
-
-    // Cleanup on unmount
     return () => {
-      console.log("[AlarmWrapper] Stopping alarm polling...");
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
+      window.removeEventListener("alarm:added", handleAlarmAdded);
+      window.removeEventListener("alarm:acknowledged", handleAlarmAcknowledged);
     };
   }, [fetchAlarms]);
 
@@ -77,33 +92,15 @@ export function AlarmNotificationWrapper({ children }: AlarmNotificationWrapperP
   const handleAcknowledge = useCallback(async (alarmId: string) => {
     console.log("[AlarmWrapper] Acknowledging alarm:", alarmId);
 
-    if (!useMockData) {
-      // Call Server Action to acknowledge
-      const result = await acknowledgeAlarm(alarmId);
+    const result = await acknowledgeAlarm(alarmId);
 
-      if (result.success) {
-        console.log("[AlarmWrapper] Alarm acknowledged successfully");
-        // Refresh alarms immediately after acknowledge
-        fetchAlarms();
-      } else {
-        console.error("[AlarmWrapper] Failed to acknowledge alarm:", result.error);
-      }
+    if (result.success) {
+      console.log("[AlarmWrapper] Alarm acknowledged successfully");
+      // Note: We don't need to refresh alarms here since the SSE event will update them
     } else {
-      // Fallback for mock alarms
-      setAlarms((prev) =>
-        prev.map((a) =>
-          a.id === alarmId
-            ? {
-                ...a,
-                acknowledged: true,
-                acknowledgedBy: "Operator",
-                acknowledgedAt: new Date().toISOString().replace("T", " ").substring(0, 19),
-              }
-            : a
-        )
-      );
+      console.error("[AlarmWrapper] Failed to acknowledge alarm:", result.error);
     }
-  }, [fetchAlarms, useMockData]);
+  }, []);
 
   return (
     <AlarmNotificationProvider alarms={alarms} onAcknowledge={handleAcknowledge}>
