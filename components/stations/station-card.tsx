@@ -146,7 +146,7 @@ export function StationCard({ station }: StationCardProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <CheckCircle className="w-3.5 h-3.5 text-[hsl(var(--status-running))]" />
-          <span className="text-xs text-[hsl(var(--text-muted))]">Scrap Rate</span>
+          <span className="text-xs text-[hsl(var(--text-muted))]">Efficency</span>
           <span className="text-sm font-bold font-mono text-gradient-accent">{efficiency}%</span>
         </div>
       </div>

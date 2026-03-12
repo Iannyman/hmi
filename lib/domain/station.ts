@@ -167,34 +167,6 @@ export class Station extends EventEmitter implements DomainObject {
   }
 
   /**
-   * Unsubscribe from device subscriptions only
-   * Keeps control data subscription active
-   */
-  async unsubscribeFromDevices(): Promise<void> {
-    for (const device of this.devices.values()) {
-      await device.unsubscribe();
-    }
-  }
-
-  /**
-   * Subscribe to device updates only
-   * Use this when navigating to a devices page for a specific station
-   * Uses batch subscription (Promise.all) for optimal performance
-   */
-  async subscribeToDevices(callback: (station: Station) => void): Promise<void> {
-    // Batch subscribe all devices in parallel
-    const subscribePromises = Array.from(this.devices.values()).map((device) =>
-      device.subscribe((device: Device) => {
-        this.emit("deviceUpdated", device);
-        callback(this);
-      })
-    );
-
-    await Promise.all(subscribePromises);
-    console.log(`[Station ${this.id}] Subscribed to ${subscribePromises.length} devices in batch`);
-  }
-
-  /**
    * Write value to a Station OPCUA node
    * Called from UI buttons or input changes
    *

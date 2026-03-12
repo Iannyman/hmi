@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AlarmPanel } from "@/components/panels/alarm-panel";
 import { getAlarms, acknowledgeAlarm as acknowledgeAlarmAction, acknowledgeAllAlarms, clearAlarmHistory } from "@/actions/alarm-actions";
 import { Alarm } from "@/types/alarm.types";
@@ -8,25 +8,20 @@ import { AlertTriangle, AlertCircle, Info, WifiOff } from "lucide-react";
 import { useConnection } from "@/hooks/use-connection";
 import { Card } from "@/components/ui/card";
 
-// Polling interval for alarms page (ms)
-const ALARM_POLL_INTERVAL = 2000;
-
 export default function AlarmsPage() {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
   const { isConnected } = useConnection();
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch alarms from Server Action
+  // Fetch alarms from Server Action (initial load only)
   const fetchAlarms = useCallback(async () => {
     try {
       const result = await getAlarms();
       if (result.success && result.data) {
         setAlarms(result.data);
-        setInitError(null); // Clear error on successful fetch
+        setInitError(null);
       } else {
-        // Check if error is due to uninitialized system
         if (result.error === "Alarm Manager not initialized") {
           setInitError("Alarm system not initialized. Please connect to OPC UA server.");
         } else {
@@ -40,28 +35,58 @@ export default function AlarmsPage() {
     }
   }, []);
 
-  // Set up polling - only when connected
+  // Listen for SSE alarm events instead of polling
   useEffect(() => {
-    // Clear any existing interval
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-    }
-
-    // Only poll when connected to OPC UA
-    if (isConnected) {
-      fetchAlarms(); // Initial fetch
-      pollIntervalRef.current = setInterval(fetchAlarms, ALARM_POLL_INTERVAL);
-    } else {
-      // Not connected - set error state
+    if (!isConnected) {
       setInitError("No OPC UA connection. Please wait for connection to be established.");
       setIsLoading(false);
+      return;
     }
 
+    const handleAlarmAdded = (event: Event) => {
+      const customEvent = event as CustomEvent<Alarm>;
+      const alarm = customEvent.detail;
+      console.log("[AlarmsPage] New alarm via SSE:", alarm.id);
+
+      setAlarms((prev) => {
+        const exists = prev.some((a) => a.id === alarm.id);
+        if (!exists) {
+          return [...prev, alarm];
+        }
+        // Update existing alarm
+        return prev.map((a) => (a.id === alarm.id ? alarm : a));
+      });
+    };
+
+    const handleAlarmAcknowledged = (event: Event) => {
+      const customEvent = event as CustomEvent<Alarm>;
+      const alarm = customEvent.detail;
+      console.log("[AlarmsPage] Alarm acknowledged via SSE:", alarm.id);
+
+      setAlarms((prev) =>
+        prev.map((a) =>
+          a.id === alarm.id
+            ? {
+                ...a,
+                acknowledged: true,
+                acknowledgedBy: alarm.acknowledgedBy,
+                acknowledgedAt: alarm.acknowledgedAt,
+              }
+            : a
+        )
+      );
+    };
+
+    // Listen for SSE alarm events
+    window.addEventListener("alarm:added", handleAlarmAdded);
+    window.addEventListener("alarm:acknowledged", handleAlarmAcknowledged);
+
+    // Initial fetch
+    fetchAlarms();
+
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
+      window.removeEventListener("alarm:added", handleAlarmAdded);
+      window.removeEventListener("alarm:acknowledged", handleAlarmAcknowledged);
     };
   }, [isConnected, fetchAlarms]);
 
@@ -69,31 +94,29 @@ export default function AlarmsPage() {
   const handleAcknowledge = useCallback(async (alarmId: string) => {
     const result = await acknowledgeAlarmAction(alarmId);
     if (result.success) {
-      // Refresh alarms immediately after acknowledge
-      fetchAlarms();
+      // SSE event will update the alarm
     } else {
       console.error("Failed to acknowledge alarm:", result.error);
     }
-  }, [fetchAlarms]);
+  }, []);
 
   // Handle acknowledge all
   const handleAcknowledgeAll = useCallback(async () => {
     const result = await acknowledgeAllAlarms();
     if (result.success) {
       console.log(`Acknowledged ${result.acknowledgedCount || 0} alarms`);
-      // Refresh alarms immediately after acknowledge
-      fetchAlarms();
+      // SSE events will update the alarms
     } else {
       console.error("Failed to acknowledge all alarms:", result.error);
     }
-  }, [fetchAlarms]);
+  }, []);
 
   // Handle clear history
   const handleClearHistory = useCallback(async () => {
     const result = await clearAlarmHistory();
     if (result.success) {
       console.log(`Cleared ${result.clearedCount || 0} acknowledged alarms`);
-      // Refresh alarms immediately after clearing
+      // Fetch updated alarms after clearing
       fetchAlarms();
     } else {
       console.error("Failed to clear alarm history:", result.error);

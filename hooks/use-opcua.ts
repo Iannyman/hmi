@@ -11,7 +11,6 @@ import { DataType } from "node-opcua";
 import {
   OPCUAConfigClient,
   NodeValue as OPCUANodeValue,
-  SubscriptionData,
   BrowseResult,
   BrowseTreeNode,
   BrowseMode,
@@ -177,69 +176,6 @@ export function useOPCUA() {
   }, []);
 
   /**
-   * Create a subscription
-   */
-  const subscribe = useCallback(
-    (
-      subscriptionName: string,
-      nodeIds: string[],
-      onUpdate: (data: SubscriptionData) => void,
-      samplingInterval?: number
-    ): Promise<boolean> => {
-      return new Promise((resolve, reject) => {
-        // Create the subscription on the server
-        fetch("/api/opcua/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscriptionName, nodeIds, samplingInterval }),
-        })
-          .then(async (response) => {
-            const result = await response.json();
-
-            if (!response.ok) {
-              throw new Error(result.details || result.error);
-            }
-
-            resolve(true);
-          })
-          .catch((err) => {
-            setError(err instanceof Error ? err.message : String(err));
-            reject(err);
-          });
-      });
-    },
-    []
-  );
-
-  /**
-   * Remove a subscription
-   */
-  const unsubscribe = useCallback(
-    async (subscriptionName: string): Promise<boolean> => {
-      try {
-        const response = await fetch("/api/opcua/subscribe", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscriptionName }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.details || result.error);
-        }
-
-        return true;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setError(message);
-        return false;
-      }
-    },
-    []
-  );
-
-  /**
    * Poll nodes at regular intervals (alternative to subscriptions)
    */
   const pollNodes = useCallback(
@@ -321,8 +257,6 @@ export function useOPCUA() {
     readNode,
     readNodes,
     writeNode,
-    subscribe,
-    unsubscribe,
     pollNodes,
     checkConnection,
     browse,

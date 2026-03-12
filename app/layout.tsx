@@ -10,7 +10,6 @@ import { OPCUADataProvider } from "@/components/providers/opcua-data-provider";
 import { HMIInitializerProvider } from "@/components/providers/hmi-initializer-provider";
 import { HMIDataProvider } from "@/components/providers/hmi-data-provider";
 import { HMISSEProvider } from "@/components/providers/hmi-sse-provider";
-import { HMIDataPollerProvider } from "@/components/providers/hmi-data-poller-provider";
 import { ConnectionProvider } from "@/hooks/use-connection";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -52,19 +51,17 @@ export default function RootLayout({
             <OPCUADataProvider>
             <HMIDataProvider>
               <HMISSEProvider>
-                <HMIDataPollerProvider>
-                  <HMIInitializerProvider>
-                    <SidebarProvider>
-                      <LineStatusProvider>
-                        <LineStatisticsProvider>
-                          <AlarmNotificationWrapper>
-                            {children}
-                          </AlarmNotificationWrapper>
-                        </LineStatisticsProvider>
-                      </LineStatusProvider>
-                    </SidebarProvider>
-                  </HMIInitializerProvider>
-                </HMIDataPollerProvider>
+                <HMIInitializerProvider>
+                  <SidebarProvider>
+                    <LineStatusProvider>
+                      <LineStatisticsProvider>
+                        <AlarmNotificationWrapper>
+                          {children}
+                        </AlarmNotificationWrapper>
+                      </LineStatisticsProvider>
+                    </LineStatusProvider>
+                  </SidebarProvider>
+                </HMIInitializerProvider>
               </HMISSEProvider>
             </HMIDataProvider>
           </OPCUADataProvider>

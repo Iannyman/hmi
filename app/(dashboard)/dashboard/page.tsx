@@ -4,8 +4,6 @@ import { StationCard } from "@/components/stations/station-card";
 import { LineControlPanel } from "@/components/panels/line-control-panel";
 import { LineStatisticsPanel } from "@/components/panels/line-statistics-panel";
 import { useMemo } from "react";
-import { useOPCUASubscription } from "@/hooks/use-opcua-subscription";
-import { usePathname } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { useStations } from "@/hooks/use-hmi-manager";
 import { useConnection } from "@/hooks/use-connection";
@@ -14,10 +12,6 @@ import { useConnection } from "@/hooks/use-connection";
 export default function DashboardPage() {
   const { stations: hmiStations, isInitialized } = useStations();
   const { isConnected } = useConnection();
-  const pathname = usePathname();
-
-  // Subscribe to route-specific nodes (Line, Order, Stations.Control)
-  const { subscribedNodeIds, currentSubscription } = useOPCUASubscription(pathname);
 
   // Transform HMI stations to display format
   const displayStations = useMemo(() => {
@@ -59,26 +53,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-
-      {/* Subscription Status */}
-      {currentSubscription && (
-        <Card className="p-4 mb-6 bg-[hsl(var(--surface))]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[hsl(var(--status-running))] animate-pulse"></div>
-              <div>
-                <p className="text-sm font-semibold">OPC UA Subscription Active</p>
-                <p className="text-xs text-muted-foreground">
-                  {currentSubscription} • {subscribedNodeIds.length} nodes subscribed
-                </p>
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              <p>Route: {pathname}</p>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Main Grid */}
       <div>
