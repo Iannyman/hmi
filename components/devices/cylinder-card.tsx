@@ -221,7 +221,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
           disabled={!cylinder.enabled || !cylinder.enableWorkPosition}
         >
           {(
-            <ChevronRight className="button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
+            <ChevronRight className="cylinder-button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
           )}
           <span className="whitespace-normal">Work Position</span>
         </Button>
@@ -236,7 +236,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
           disabled={!cylinder.enabled || !cylinder.enableHomePosition}
         >
           {(
-            <ChevronLeft className="button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
+            <ChevronLeft className="cylinder-button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
           )}
           <span className="whitespace-normal">Home Position</span>
         </Button>

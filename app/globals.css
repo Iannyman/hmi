@@ -533,9 +533,16 @@
     container-name: station;
   }
 
-  /* Hide button icons on narrow buttons */
+  /* Hide cylinder button icons on narrow buttons */
   @container button (max-width: 130px) {
-    .button-icon {
+    .cylinder-button-icon {
+      display: none;
+    }
+  }
+
+  /* Hide station button icons on narrow buttons */
+  @container button (max-width: 50px) {
+    .station-button-icon {
       display: none;
     }
   }

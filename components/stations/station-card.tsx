@@ -193,9 +193,9 @@ export function StationCard({ station }: StationCardProps) {
           }}
         >
           {loadingAction === "auto" ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="station-button-icon w-5 h-5 mr-2 animate-spin flex-shrink-0" />
           ) : (
-            <Play className="w-5 h-5 mr-2" />
+            <Play className="station-button-icon w-5 h-5 mr-2 flex-shrink-0" />
           )}
           Auto
         </Button>
@@ -211,9 +211,9 @@ export function StationCard({ station }: StationCardProps) {
           }}
         >
           {loadingAction === "init" ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="station-button-icon w-5 h-5 mr-2 animate-spin flex-shrink-0" />
           ) : (
-            <RotateCcw className="w-5 h-5 mr-2" />
+            <RotateCcw className="station-button-icon w-5 h-5 mr-2 flex-shrink-0" />
           )}
           Init
         </Button>
@@ -229,9 +229,9 @@ export function StationCard({ station }: StationCardProps) {
           }}
         >
           {loadingAction === "setup" ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="station-button-icon w-5 h-5 mr-2 animate-spin flex-shrink-0" />
           ) : (
-            <Hand className="w-5 h-5 mr-2" />
+            <Hand className="station-button-icon w-5 h-5 mr-2 flex-shrink-0" />
           )}
           Setup
         </Button>

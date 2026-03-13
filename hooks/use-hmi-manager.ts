@@ -34,7 +34,7 @@ interface StationData {
  * Polling is handled by HMIDataPollerProvider - this just consumes data
  */
 export function useHMIManager() {
-  const { isInitialized, isInitializing, error, hmiData, setIsInitialized, setIsInitializing, setError, setHmiData } = useHMIDataContext();
+  const { isInitialized, isInitializing, error, hmiData, setIsInitialized, setIsInitializing, setError } = useHMIDataContext();
 
   /**
    * Initialize HMI system
@@ -92,28 +92,6 @@ export function useHMIManager() {
     return devices;
   }, [hmiData]);
 
-  /**
-   * Manual refresh HMI data from server
-   */
-  const refreshData = useCallback(async () => {
-    if (!isInitialized) return;
-
-    try {
-      const response = await fetch("/api/hmi/read");
-      const result = await response.json();
-
-      if (result.success) {
-        setHmiData(result.data);
-      } else {
-        console.warn("[useHMIManager] API returned:", result.error);
-        setHmiData(null);
-      }
-    } catch (err) {
-      console.warn("[useHMIManager] Failed to refresh HMI data:", err);
-      setHmiData(null);
-    }
-  }, [isInitialized, setHmiData]);
-
   return {
     // State
     isInitialized,
@@ -126,7 +104,6 @@ export function useHMIManager() {
     initialize,
     getStation,
     getAllDevices,
-    refreshData,
     setIsInitialized,
   };
 }

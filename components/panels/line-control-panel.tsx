@@ -89,48 +89,48 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
     <div className={cn("card p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4", className)}>
 
       {/* Buttons */}
-      <div className="flex flex-row items-center justify-center gap-3 w-full">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
         <Button
           size="default"
           variant="success"
           disabled={lineStatus === "auto" || !!loadingAction || !isInitialized}
           onClick={handleStart}
-          className="flex-1"
+          className="flex-1 min-w-0 sm:flex-none sm:w-28"
         >
           {loadingAction === "start" ? (
-            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Play className="w-4 h-4" />
           )}
-          Start
+          <span className="hidden sm:inline ml-1.5">Start</span>
         </Button>
         <Button
           size="default"
           variant="outline"
           disabled={!!loadingAction || !isInitialized}
           onClick={handleInit}
-          className="flex-1"
+          className="flex-1 min-w-0 sm:flex-none sm:w-28"
         >
           {loadingAction === "init" ? (
-            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+            <RotateCcw className="w-4 h-4" />
           )}
-          Init
+          <span className="hidden sm:inline ml-1.5">Init</span>
         </Button>
         <Button
           size="default"
           variant="outline"
           disabled={lineStatus === "setup" || !!loadingAction || !isInitialized}
           onClick={handleStop}
-          className="flex-1"
+          className="flex-1 min-w-0 sm:flex-none sm:w-28"
         >
           {loadingAction === "stop" ? (
-            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Pause className="w-4 h-4" />
           )}
-          Stop
+          <span className="hidden sm:inline ml-1.5">Stop</span>
         </Button>
       </div>
     </div>
