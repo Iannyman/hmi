@@ -20,10 +20,19 @@ export interface DeviceErrorEvent {
   errorMessage: string;
 }
 
+export interface LineErrorEvent {
+  lineName: string;
+  errorMessage: string;
+}
+
 export class AlarmManager extends EventEmitter {
   private alarms: Map<string, Alarm> = new Map();
   private hmiManager: HMIManager;
   private isInitialized: boolean = false;
+
+  // Alarm cooldown state - suppresses new alarms for 2s after acknowledgment
+  private alarmCooldownUntil: number = 0;
+  private readonly ALARM_COOLDOWN_MS = 2000;
 
   constructor(hmiManager: HMIManager) {
     super();
@@ -53,6 +62,9 @@ export class AlarmManager extends EventEmitter {
     // Set up error listeners for all existing stations and devices
     this.setupErrorListeners();
 
+    // Set up error listener for Line
+    this.setupLineErrorListener();
+
     // Listen for new stations/devices being added
     this.hmiManager.onDeviceAdded(({ stationId, device }) => {
       console.log(`[AlarmManager] Setting up error listener for new device: ${stationId}.${device.id}`);
@@ -75,6 +87,17 @@ export class AlarmManager extends EventEmitter {
     console.log("[AlarmManager] Scanning for existing errors...");
     const stations = this.hmiManager.getAllStations();
     let foundErrors = 0;
+
+    // Check Line for existing errors
+    const line = this.hmiManager.getLine();
+    if (line.errorMessage && line.errorMessage !== "") {
+      const lineErrorData: LineErrorEvent = {
+        lineName: line.name || "Line",
+        errorMessage: line.errorMessage,
+      };
+      this.createLineAlarm(lineErrorData);
+      foundErrors++;
+    }
 
     for (const station of stations) {
       const devices = station.getDevices();
@@ -118,6 +141,19 @@ export class AlarmManager extends EventEmitter {
   }
 
   /**
+   * Set up error listener for Line
+   */
+  private setupLineErrorListener(): void {
+    const line = this.hmiManager.getLine();
+    // Listen to error events from Line
+    line.on("error", (errorData: LineErrorEvent) => {
+      console.log(`[AlarmManager] Error received from Line:`, errorData.errorMessage);
+      this.createLineAlarm(errorData);
+    });
+    console.log("[AlarmManager] Set up error listener for Line");
+  }
+
+  /**
    * Set up error listener for a single device
    */
   private setupDeviceErrorListener(stationId: string, device: any): void {
@@ -135,6 +171,12 @@ export class AlarmManager extends EventEmitter {
    * Create an alarm from a device error event
    */
   private createAlarm(errorData: DeviceErrorEvent): void {
+    // Suppress alarm creation during cooldown
+    if (this.isInAlarmCooldown()) {
+      console.log(`[AlarmManager] Device alarm suppressed during cooldown: ${errorData.deviceName} - ${errorData.errorMessage}`);
+      return;
+    }
+
     const alarmId = `${errorData.deviceId}-${Date.now()}`;
 
     const alarm: Alarm = {
@@ -155,6 +197,48 @@ export class AlarmManager extends EventEmitter {
   }
 
   /**
+   * Create an alarm from a Line error event
+   * Only creates if an alarm with the same error message doesn't already exist
+   */
+  private createLineAlarm(errorData: LineErrorEvent): void {
+    // Suppress alarm creation during cooldown
+    if (this.isInAlarmCooldown()) {
+      console.log(`[AlarmManager] Line alarm suppressed during cooldown: ${errorData.errorMessage}`);
+      return;
+    }
+
+    // Check if an alarm for this Line error message already exists
+    const existingAlarm = Array.from(this.alarms.values()).find(
+      alarm => alarm.deviceId === "Line" &&
+               alarm.description === errorData.errorMessage &&
+               !alarm.acknowledged
+    );
+
+    if (existingAlarm) {
+      console.log(`[AlarmManager] Line alarm already exists for: ${errorData.errorMessage}`);
+      return;
+    }
+
+    const alarmId = `line-${Date.now()}`;
+
+    const alarm: Alarm = {
+      id: alarmId,
+      title: `Line Error`,
+      description: errorData.errorMessage,
+      severity: "critical",
+      device: errorData.lineName,
+      deviceId: "Line",
+      timestamp: new Date().toISOString().replace("T", " ").substring(0, 19),
+      acknowledged: false,
+    };
+
+    this.alarms.set(alarmId, alarm);
+    console.log(`[AlarmManager] Line alarm created: ${alarmId} - ${alarm.title}`);
+
+    this.emit("alarm:added", alarm);
+  }
+
+  /**
    * Get all current alarms
    */
   getAlarms(): Alarm[] {
@@ -170,6 +254,7 @@ export class AlarmManager extends EventEmitter {
 
   /**
    * Acknowledge an alarm
+   * Starts cooldown period to suppress duplicate alarms while PLC processes acknowledge
    */
   acknowledgeAlarm(alarmId: string): void {
     const alarm = this.alarms.get(alarmId);
@@ -178,6 +263,10 @@ export class AlarmManager extends EventEmitter {
       alarm.acknowledgedBy = "Operator";
       alarm.acknowledgedAt = new Date().toISOString().replace("T", " ").substring(0, 19);
       console.log(`[AlarmManager] Alarm acknowledged: ${alarmId}`);
+
+      // Start cooldown for any alarm acknowledgment
+      this.startAlarmCooldown();
+
       this.emit("alarm:acknowledged", alarm);
     }
   }
@@ -207,7 +296,35 @@ export class AlarmManager extends EventEmitter {
     this.alarms.clear();
     this.removeAllListeners();
     this.isInitialized = false;
+    this.alarmCooldownUntil = 0; // Reset cooldown
     console.log("[AlarmManager] Reset complete");
+  }
+
+  // Cooldown helpers
+
+  /**
+   * Start the alarm cooldown period
+   * Called when any alarm is acknowledged
+   */
+  private startAlarmCooldown(): void {
+    this.alarmCooldownUntil = Date.now() + this.ALARM_COOLDOWN_MS;
+    console.log("[AlarmManager] Alarm cooldown started");
+  }
+
+  /**
+   * Check if currently in cooldown period
+   * Auto-resets cooldown state when expired
+   */
+  private isInAlarmCooldown(): boolean {
+    const now = Date.now();
+    if (now < this.alarmCooldownUntil) {
+      return true;
+    }
+    if (this.alarmCooldownUntil > 0) {
+      this.alarmCooldownUntil = 0;
+      console.log("[AlarmManager] Alarm cooldown expired");
+    }
+    return false;
   }
 
   // Event subscription helpers

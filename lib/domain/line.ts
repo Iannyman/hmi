@@ -22,7 +22,11 @@ export class Line extends EventEmitter implements DomainObject {
   public mode: LineMode = "setup";
   public partsOK: number = 0;
   public partsNOK: number = 0;
+  public errorMessage: string = "";
   public order: Order;
+
+  // Track previous error message for change detection
+  private previousErrorMessage: string = "";
 
   // Node IDs (cached for performance)
   private nodeIds: {
@@ -31,6 +35,7 @@ export class Line extends EventEmitter implements DomainObject {
     partsNOK: string;
     resetStatistics: string;
     status: string;
+    errorMessage : string;
     mode: string;
     acknowledgeErrors: string;
   } | null = null;
@@ -55,6 +60,7 @@ export class Line extends EventEmitter implements DomainObject {
         partsNOK: this.nodeMapper.getNodeId("Line.dPartsNOK"),
         resetStatistics: this.nodeMapper.getNodeId("Line.xResetStatistics"),
         status: this.nodeMapper.getNodeId("Line.sInStatus"),
+        errorMessage: this.nodeMapper.getNodeId("Line.sErrorMessage"),
         mode: this.nodeMapper.getNodeId("Line.iMode"),
         acknowledgeErrors: this.nodeMapper.getNodeId("Line.xAckErrors"),
       };
@@ -67,6 +73,7 @@ export class Line extends EventEmitter implements DomainObject {
       this.nodeIds.partsNOK,
       this.nodeIds.status,
       this.nodeIds.mode,
+      this.nodeIds.errorMessage,
     ];
 
     this.subscriptionId = await this.opcuaService.subscribe(
@@ -126,6 +133,7 @@ export class Line extends EventEmitter implements DomainObject {
       this.nodeIds.partsNOK,
       this.nodeIds.status,
       this.nodeIds.mode,
+      this.nodeIds.errorMessage,
     ];
 
     const results = await this.opcuaService.readMultipleNodes(nodeIds);
@@ -135,6 +143,10 @@ export class Line extends EventEmitter implements DomainObject {
     this.partsNOK = results[2].value as number;
     this.status = this.mapStatus(results[3].value as string);
     this.mode = this.mapMode(results[4].value as number);
+    this.errorMessage = results[5].value as string;
+
+    // Initialize previousErrorMessage for change detection
+    this.previousErrorMessage = this.errorMessage;
 
     await this.order.refresh();
 
@@ -168,6 +180,20 @@ export class Line extends EventEmitter implements DomainObject {
         break;
       case this.nodeIds.mode:
         this.mode = this.mapMode(value as number);
+        break;
+      case this.nodeIds.errorMessage:
+        const oldError = this.previousErrorMessage;
+        this.previousErrorMessage = this.errorMessage;
+        this.errorMessage = value as string;
+
+        // Emit error event only if this is a NEW error (error message changed)
+        // and there are listeners (avoid error during initialization)
+        if (oldError !== this.errorMessage && this.errorMessage && this.listenerCount("error") > 0) {
+          this.emit("error", {
+            lineName: this.name || "Line",
+            errorMessage: this.errorMessage,
+          });
+        }
         break;
     }
 
