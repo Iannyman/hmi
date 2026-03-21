@@ -211,20 +211,36 @@ export class Cylinder extends Device {
   // Methods (for UI buttons) - convenience wrappers around write()
 
   /**
-   * Move cylinder to work position
+   * Start move cylinder to work position
    * Called from UI button
    */
-  async moveToWorkPosition(): Promise<void> {
+  async startMoveToWorkPosition(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xToWorkPosition`, true);
   }
 
   /**
-   * Move cylinder to home position
+   * Stop move cylinder to work position
    * Called from UI button
    */
-  async moveToHomePosition(): Promise<void> {
+  async stopMoveToWorkPosition(): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xToWorkPosition`, false);
+  }
+
+  /**
+   * Start move cylinder to home position
+   * Called from UI button
+   */
+  async startMoveToHomePosition(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xToHomePosition`, true);
   }
+
+  /**
+   * Stop move cylinder to home position
+   * Called from UI button
+   */
+  async stopMoveToHomePosition(): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xToHomePosition`, false);
+  }  
 
   /**
    * Set timeout value

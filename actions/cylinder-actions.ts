@@ -9,7 +9,7 @@
 
 import { HMILocator } from "@/lib/hmi-locator";
 
-export async function moveToWorkPosition(stationId: string, cylinderId: string) {
+export async function startMoveToWorkPosition(stationId: string, cylinderId: string) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -20,11 +20,11 @@ export async function moveToWorkPosition(stationId: string, cylinderId: string) 
     return { success: false, error: "Cylinder not found" };
   }
 
-  await (cylinder as any).moveToWorkPosition();
+  await (cylinder as any).startMoveToWorkPosition();
   return { success: true };
 }
 
-export async function moveToHomePosition(stationId: string, cylinderId: string) {
+export async function stopMoveToWorkPosition(stationId: string, cylinderId: string) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -35,7 +35,37 @@ export async function moveToHomePosition(stationId: string, cylinderId: string) 
     return { success: false, error: "Cylinder not found" };
   }
 
-  await (cylinder as any).moveToHomePosition();
+  await (cylinder as any).stopMoveToWorkPosition();
+  return { success: true };
+}
+
+export async function startMoveToHomePosition(stationId: string, cylinderId: string) {
+  const station = HMILocator.getStation(stationId);
+  if (!station) {
+    return { success: false, error: "Station not found" };
+  }
+
+  const cylinder = station.getDevice(cylinderId);
+  if (!cylinder || cylinder.type !== 'cylinder') {
+    return { success: false, error: "Cylinder not found" };
+  }
+
+  await (cylinder as any).startMoveToHomePosition();
+  return { success: true };
+}
+
+export async function stopMoveToHomePosition(stationId: string, cylinderId: string) {
+  const station = HMILocator.getStation(stationId);
+  if (!station) {
+    return { success: false, error: "Station not found" };
+  }
+
+  const cylinder = station.getDevice(cylinderId);
+  if (!cylinder || cylinder.type !== 'cylinder') {
+    return { success: false, error: "Cylinder not found" };
+  }
+
+  await (cylinder as any).stopMoveToHomePosition();
   return { success: true };
 }
 
