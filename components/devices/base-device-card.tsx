@@ -1,7 +1,7 @@
 "use client";
 
 import type { DeviceType, DeviceStatus } from "@/types/device.types";
-import { Settings, Wrench, Battery, Activity, Bot, ArrowRight, HardDrive } from "lucide-react";
+import { Settings, Wrench, Battery, Activity, Bot, ArrowRight, LoaderPinwheel } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const deviceIcons: Record<DeviceType, React.ElementType> = {
   sensor: Activity,
   robot: Bot,
   conveyor: ArrowRight,
-  drive: HardDrive,
+  drive: LoaderPinwheel,
   cylinder: Battery
 };
 
@@ -55,7 +55,8 @@ const statusColors: Record<DeviceStatus, { bg: string; text: string; glow: strin
   auto: {
     bg: "bg-gradient-to-br from-cyan-600/20 to-cyan-600/10",
     text: "text-cyan-500",
-    glow: "card-running-glow"
+    // glow: "card-running-glow"
+    glow: ""
   },
 };
 

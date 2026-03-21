@@ -45,7 +45,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
   const labelWP = getLabelWP(cylinder.details);
   const hasError = Boolean(cylinder.errorMessage);
 
-  // Local state for timeout input (use 0 as default if undefined)
+  // Local state for timeout input with debouncing 
   const [timeoutValue, setTimeoutValue] = useState(cylinder.timeout ?? 0);
   const timeoutDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -71,7 +71,10 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
     // Set new timeout for debounced write
     timeoutDebounceRef.current = setTimeout(async () => {
       if (clampedValue >= 0 && cylinder.stationId) {
-        await setCylinderTimeout(cylinder.stationId, cylinder.id, clampedValue);
+        const result = await setCylinderTimeout(cylinder.stationId, cylinder.id, clampedValue);
+        if (!result.success) {
+          console.error("Failed to set timeout:", result.error);
+        }
       }
     }, 500); // 500ms debounce
   };
@@ -101,6 +104,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
     }
   };
 
+  // Refactor station name
   const stationName = cylinder.stationId.replace(/_/g, ' ');
 
   return (
@@ -200,7 +204,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
         </div>
       </div>
 
-      {/* Current Error */}
+      {/* Error inidcator*/}
       {hasError && (
         <div className="flex items-center gap-2 mb-4 bg-[hsl(var(--status-error))]/10 rounded-lg px-3 py-2 border border-[hsl(var(--status-error))] shadow-[0_0_12px_rgba(239,68,68,0.25)]">
           <AlertTriangle className="w-4 h-4 text-[hsl(var(--status-error))]" />

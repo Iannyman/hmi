@@ -237,23 +237,6 @@ export class Cylinder extends Device {
   }
 
   // Computed properties (for display)
-
-  /**
-   * Check if cylinder has an error
-   */
-  hasError(): boolean {
-    return this.errorMessage !== '';
-  }
-
-  /**
-   * Get current position as string
-   */
-  getPosition(): string {
-    if (this.inWorkPosition) return "Work Position";
-    if (this.inHomePosition) return "Home Position";
-    return "Unknown";
-  }
-
   /**
    * Extract name from details string
    * Details format: "Name/labelHP/labelWP"
@@ -262,25 +245,5 @@ export class Cylinder extends Device {
     if (!this.details) return "Cylinder";
     const parts = this.details.split('/');
     return parts[0] || "";
-  }
-
-  /**
-   * Extract Home Position label from details string
-   * Details format: "Name/labelHP/labelWP"
-   */
-  getLabelHP(): string {
-    if (!this.details) return "Home Position";
-    const parts = this.details.split('/');
-    return parts[1] || "Home Position";
-  }
-
-  /**
-   * Extract Work Position label from details string
-   * Details format: "Name/labelHP/labelWP"
-   */
-  getLabelWP(): string {
-    if (!this.details) return "Work Position";
-    const parts = this.details.split('/');
-    return parts[2] || "Work Position";
   }
 }

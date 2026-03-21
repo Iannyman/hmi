@@ -76,16 +76,14 @@ export interface ConveyorData {
 }
 
 export interface DriveData {
-  frequency: number;
-  torque: number;
-  powerFactor: number;
-  voltage: number;
-  current: number;
-  faultCode?: string;
-  faultHistory: Array<{
-    code: string;
-    timestamp: string;
-  }>;
+  actPosition: number;
+  actPositionIndex: number;
+  axisMoving: boolean;
+  errorMessage?: string;
+  enForward: boolean;
+  enBackward: boolean;
+  enPositioning: boolean;
+  targetPositionIndex: number;
 }
 
 export interface TrendData {

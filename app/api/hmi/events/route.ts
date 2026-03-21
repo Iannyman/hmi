@@ -118,13 +118,14 @@ function serializeDevice(device: any, stationId: string) {
   if (device instanceof Drive) {
     return {
       ...baseData,
-      frequency: device.frequency,
-      torque: device.torque,
-      powerFactor: device.powerFactor,
-      voltage: device.voltage,
-      current: device.current,
-      faultCode: device.faultCode,
-      faultHistory: device.faultHistory,
+      actPosition: device.actPosition,
+      actPositionIndex: device.actPositionIndex,
+      axisMoving: device.axisMoving,
+      errorMessage: device.errorMessage,
+      enForward: device.enForward,
+      enBackward: device.enBackward,
+      enPositioning: device.enPositioning,
+      targetPositionIndex: device.targetPositionIndex,
     };
   }
 
