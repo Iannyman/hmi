@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { LineStatus } from "@/types/domain.types";
 
 // Polling interval for header alarm count (ms)
-const ALARM_POLL_INTERVAL = 3000;
+const ALARM_POLL_INTERVAL = parseInt(process.env.NEXT_PUBLIC_HEADER_ALARM_POLL_INTERVAL_MS || "3000", 10);
 
 interface UserAccount {
   id: string;

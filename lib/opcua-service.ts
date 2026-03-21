@@ -368,7 +368,7 @@ class OPCUAService {
         requestedPublishingInterval: samplingInterval,
         requestedLifetimeCount: 100,
         requestedMaxKeepAliveCount: 10,
-        maxNotificationsPerPublish: 100,
+        maxNotificationsPerPublish: 1,  // Changed from 100 - send immediately
         publishingEnabled: true,
         priority: 10,
       });
@@ -391,7 +391,6 @@ class OPCUAService {
         item.on("changed", (dataValue: DataValue) => {
           // Attach nodeId to dataValue so the callback knows which node changed
           (dataValue as any).nodeId = nodeId;
-          // console.log(`[OPC UA Subscription] ${nodeId} = ${dataValue.value?.value} (statusCode: ${dataValue.statusCode?.toString()})`);
           callback(dataValue as any);
         });
 

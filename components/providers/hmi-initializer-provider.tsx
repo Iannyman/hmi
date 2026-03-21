@@ -23,7 +23,7 @@ interface HMIInitializerProviderProps {
 }
 
 // Reconnection settings
-const RECONNECT_INTERVAL_MS = 5000; // Try to reconnect every 5 seconds
+const RECONNECT_INTERVAL_MS = parseInt(process.env.NEXT_PUBLIC_RECONNECT_INTERVAL_MS || "5000", 10);
 
 export function HMIInitializerProvider({ children }: HMIInitializerProviderProps) {
   const { isConnected, isLoading, connect, disconnect, browse, checkConnection } = useOPCUA();
@@ -88,7 +88,7 @@ export function HMIInitializerProvider({ children }: HMIInitializerProviderProps
 
     // Wait a bit before first attempt to ensure disconnect completes
     // This prevents race conditions where client/session aren't fully cleared yet
-    const firstAttemptDelay = 1000;
+    const firstAttemptDelay = parseInt(process.env.NEXT_PUBLIC_RECONNECT_FIRST_DELAY_MS || "1000", 10);
 
     const timeoutId = setTimeout(() => {
       // Check if we're still supposed to be reconnecting
@@ -211,7 +211,7 @@ export function HMIInitializerProvider({ children }: HMIInitializerProviderProps
         console.log("[HMIInitializer] Syncing connection state:", isConnected, "->", shouldBeConnected);
         setSharedConnection(shouldBeConnected);
       }
-    }, 2000); // Check every 2 seconds
+    }, parseInt(process.env.NEXT_PUBLIC_CONNECTION_SYNC_INTERVAL_MS || "2000", 10));
 
     return () => clearInterval(syncInterval);
   }, [initAttempted, isConnected]);

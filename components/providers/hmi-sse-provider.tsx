@@ -74,7 +74,6 @@ export function HMISSEProvider({ children }: HMISSEProviderProps) {
 
       eventSource.addEventListener("device:updated", (e: MessageEvent) => {
         const { stationId, device } = JSON.parse(e.data);
-        console.log(`[HMISSEProvider] Device updated: ${stationId}.${device.id}`);
         const station = currentData.stations.get(stationId);
         if (station && station.devices) {
           const deviceIndex = station.devices.findIndex((d: any) => d.id === device.id);
@@ -127,7 +126,7 @@ export function HMISSEProvider({ children }: HMISSEProviderProps) {
       updateTimeout = setTimeout(() => {
         updateContext();
         updateTimeout = null;
-      }, 100); // Batch updates within 100ms
+      }, 0); // Instant updates - changed from 100ms for faster response
     };
 
     connect();

@@ -234,10 +234,10 @@ export async function GET(request: NextRequest) {
         console.error("[SSE] Error sending initial data:", err);
       }
 
-      // Keep-alive: send a comment every 30 seconds to prevent timeout
+      // Keep-alive: send a comment periodically to prevent timeout
       const keepAliveInterval = setInterval(() => {
         controller.enqueue(encoder.encode(": keep-alive\n\n"));
-      }, 30000);
+      }, parseInt(process.env.NEXT_PUBLIC_SSE_KEEPALIVE_INTERVAL_MS || "30000", 10));
 
       // Cleanup on client disconnect
       request.signal.addEventListener("abort", () => {
