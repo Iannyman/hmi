@@ -20,7 +20,7 @@ export async function startJogPositive(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).jogPositive();
+  await (drive as any).startJogPositive();
   return { success: true };
 }
 
@@ -50,7 +50,7 @@ export async function startJogNegative(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).jogNegative();
+  await (drive as any).startJogNegative();
   return { success: true };
 }
 

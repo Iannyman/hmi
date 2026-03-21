@@ -181,28 +181,36 @@ export class Drive extends Device {
   // Methods (for UI buttons) - convenience wrappers around write()
 
   /**
-   * Jog positive direction
+   * Start jog positive direction
    * Called from UI button
    */
-  async jogPositive(): Promise<void> {
+  async startJogPositive(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xJogPositive`, true);
   }
 
   /**
-   * Jog negative direction
+   * Stop jog positive direction
+   * Called from UI button release
+   */
+  async stopJogPositive(): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xJogPositive`, false);
+  }  
+
+  /**
+   * Start jog negative direction
    * Called from UI button
    */
-  async jogNegative(): Promise<void> {
+  async startJogNegative(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xJogNegative`, true);
   }
 
   /**
-   * Set position index
-   * Called from UI input
+   * Stop jog negative direction
+   * Called from UI button release
    */
-  async setPositionIndex(index: number): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.iSetPositionIndex`, index);
-  }
+  async stopJogNegative(): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xJogNegative`, false);
+  }  
 
   /**
    * Start homing sequence
@@ -213,35 +221,19 @@ export class Drive extends Device {
   }
 
   /**
-   * Start positioning to set index
-   * Called from UI button
-   */
-  async startPosition(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xStartPosition`, true);
-  }
-
-  /**
-   * Stop jog positive
-   * Called from UI button release
-   */
-  async stopJogPositive(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogPositive`, false);
-  }
-
-  /**
-   * Stop jog negative
-   * Called from UI button release
-   */
-  async stopJogNegative(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogNegative`, false);
-  }
-
-  /**
    * Stop homing sequence
    * Called from UI button release
    */
   async stopHomming(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xStartHomming`, false);
+  }  
+
+  /**
+   * Start positioning to set index
+   * Called from UI button
+   */
+  async startPosition(): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xStartPosition`, true);
   }
 
   /**
@@ -251,4 +243,12 @@ export class Drive extends Device {
   async stopPosition(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xStartPosition`, false);
   }
+
+  /**
+   * Set position index
+   * Called from UI input
+   */
+  async setPositionIndex(index: number): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.iSetPositionIndex`, index);
+  }  
 }
