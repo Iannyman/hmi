@@ -61,6 +61,54 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
     }, 500); // 500ms debounce
   };
 
+  const handleStartHoming = async () => {
+    if (!drive.stationId) return;
+    const result = await startHoming(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to start homing:", result.error);
+  };
+
+  const handleStopHoming = async () => {
+    if (!drive.stationId) return;
+    const result = await stopHoming(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to stop homing:", result.error);
+  };
+
+  const handleStartPositioning = async () => {
+    if (!drive.stationId) return;
+    const result = await startPositioning(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to start positioning:", result.error);
+  };  
+
+  const handleStopPositioning = async () => {
+    if (!drive.stationId) return;
+    const result = await stopPositioning(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to stop positioning:", result.error);
+  };    
+
+  const handleStartJogPositive = async () => {
+    if (!drive.stationId) return;
+    const result = await startJogPositive(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to start jog positive:", result.error);
+  };    
+
+  const handleStopJogPositive = async () => {
+    if (!drive.stationId) return;
+    const result = await stopJogPositive(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to stop jog positive:", result.error);
+  };    
+
+  const handleStartJogNegative = async () => {
+    if (!drive.stationId) return;
+    const result = await startJogNegative(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to start jog negative:", result.error);
+  };    
+
+  const handleStopJogNegative = async () => {
+    if (!drive.stationId) return;
+    const result = await stopJogNegative(drive.stationId, drive.id);
+    if (!result.success) console.error("Failed to stop jog negative:", result.error);
+  }; 
+
   // Refactor station name
   const stationName = drive.stationId.replace(/_/g, ' ');
 
@@ -112,7 +160,7 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         <div className="bg-[hsl(var(--surface))] rounded-xl p-2 sm:p-3 text-center border border-[hsl(var(--border))]">
           <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
             <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(var(--text-muted))]" />
-            <span className="text-[9px] sm:text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold">Position Index</span>
+            <span className="text-[9px] sm:text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold"> Act Position Index</span>
           </div>
           <p className="text-lg sm:text-xl font-bold font-mono text-gradient">{drive.actPositionIndex}</p>
           <p className="text-[9px] sm:text-[10px] text-[hsl(var(--text-muted))]">#</p>
@@ -153,31 +201,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={false}
-          onMouseDown={async () => {
-            if (!drive.stationId) return;
-            const result = await startHoming(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start homing:", result.error);
-          }}
-          onMouseUp={async () => {
-            if (!drive.stationId) return;
-            const result = await stopHoming(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop homing:", result.error);
-          }}
-          onMouseLeave={async () => {
-            if (!drive.stationId) return;
-            const result = await stopHoming(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop homing:", result.error);
-          }}
-          onTouchStart={async () => {
-            if (!drive.stationId) return;
-            const result = await startHoming(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start homing:", result.error);
-          }}
-          onTouchEnd={async () => {
-            if (!drive.stationId) return;
-            const result = await stopHoming(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop homing:", result.error);
-          }}
+          onMouseDown={handleStartHoming}
+          onMouseUp={handleStopHoming}
+          onMouseLeave={handleStopHoming}
+          onTouchStart={handleStartHoming}
+          onTouchEnd={handleStopHoming}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -190,31 +218,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enPositioning}
-          onMouseDown={async () => {
-            if (!drive.stationId) return;
-            const result = await startPositioning(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start positioning:", result.error);
-          }}
-          onMouseUp={async () => {
-            if (!drive.stationId) return;
-            const result = await stopPositioning(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop positioning:", result.error);
-          }}
-          onMouseLeave={async () => {
-            if (!drive.stationId) return;
-            const result = await stopPositioning(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop positioning:", result.error);
-          }}
-          onTouchStart={async () => {
-            if (!drive.stationId) return;
-            const result = await startPositioning(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start positioning:", result.error);
-          }}
-          onTouchEnd={async () => {
-            if (!drive.stationId) return;
-            const result = await stopPositioning(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop positioning:", result.error);
-          }}
+          onMouseDown={handleStartPositioning}
+          onMouseUp={handleStopPositioning}
+          onMouseLeave={handleStopPositioning}
+          onTouchStart={handleStartPositioning}
+          onTouchEnd={handleStopPositioning}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -227,31 +235,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enForward}
-          onMouseDown={async () => {
-            if (!drive.stationId) return;
-            const result = await startJogPositive(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start jog positive:", result.error);
-          }}
-          onMouseUp={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogPositive(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog positive:", result.error);
-          }}
-          onMouseLeave={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogPositive(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog positive:", result.error);
-          }}
-          onTouchStart={async () => {
-            if (!drive.stationId) return;
-            const result = await startJogPositive(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start jog positive:", result.error);
-          }}
-          onTouchEnd={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogPositive(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog positive:", result.error);
-          }}
+          onMouseDown={handleStartJogPositive}
+          onMouseUp={handleStopJogPositive}
+          onMouseLeave={handleStopJogPositive}
+          onTouchStart={handleStartJogPositive}
+          onTouchEnd={handleStopJogPositive}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -264,31 +252,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enBackward}
-          onMouseDown={async () => {
-            if (!drive.stationId) return;
-            const result = await startJogNegative(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start jog negative:", result.error);
-          }}
-          onMouseUp={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogNegative(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog negative:", result.error);
-          }}
-          onMouseLeave={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogNegative(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog negative:", result.error);
-          }}
-          onTouchStart={async () => {
-            if (!drive.stationId) return;
-            const result = await startJogNegative(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to start jog negative:", result.error);
-          }}
-          onTouchEnd={async () => {
-            if (!drive.stationId) return;
-            const result = await stopJogNegative(drive.stationId, drive.id);
-            if (!result.success) console.error("Failed to stop jog negative:", result.error);
-          }}
+          onMouseDown={handleStartJogNegative}
+          onMouseUp={handleStopJogNegative}
+          onMouseLeave={handleStopJogNegative}
+          onTouchStart={handleStartJogNegative}
+          onTouchEnd={handleStopJogNegative}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"

@@ -45,8 +45,6 @@ export class Drive extends Device {
           errorMessage: this.errorMessage,
         });
       }
-    } else if (this.axisMoving) {
-      this.status = "auto";
     } else {
       this.status = "ready";
     }
@@ -252,31 +250,5 @@ export class Drive extends Device {
    */
   async stopPosition(): Promise<void> {
     await this.write(`${this.stationId}.${this.id}.xStartPosition`, false);
-  }
-
-  // Computed properties (for display)
-
-  /**
-   * Check if drive has an active error
-   */
-  hasError(): boolean {
-    return this.errorMessage !== "" && this.errorMessage !== "0";
-  }
-
-  /**
-   * Get drive status
-   */
-  getDriveStatus(): "idle" | "moving" | "fault" | "warning" {
-    if (this.hasError()) return "fault";
-    if (this.axisMoving) return "moving";
-    if (this.actPositionIndex !== 0) return "warning";
-    return "idle";
-  }
-
-  /**
-   * Get position display text
-   */
-  getPositionDisplay(): string {
-    return `Pos: ${this.actPosition} [${this.actPositionIndex}]`;
   }
 }
