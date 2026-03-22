@@ -169,7 +169,6 @@ export function Header() {
         <div className="hidden md:flex items-center gap-4 text-sm">
           <span className="text-[hsl(var(--text-muted))]">{lineName}</span>
           <span className="text-[hsl(var(--text-dim))]">|</span>
-          <span className="text-[hsl(var(--text-muted))] capitalize">{lineMode} Mode</span>
         </div>
       </div>
 
