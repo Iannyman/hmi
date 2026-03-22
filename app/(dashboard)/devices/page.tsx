@@ -141,6 +141,9 @@ function DevicesContent() {
 
   // Determine data source
   const usingRealData = getAllDevices().length > 0;
+  
+  // Refactor station name
+  const stationName = station?.name.replace(/_/g, ' ');
 
   return (
     <div className="p-6">
@@ -157,7 +160,7 @@ function DevicesContent() {
             </Link>
           )}
           <h1 className="text-2xl font-semibold tracking-tight">
-            {station ? `${station.name}` : "All Devices"}
+            {station ? `${stationName}` : "All Devices"}
           </h1>
         </div>
         <div className="flex items-center gap-3 mb-4">
