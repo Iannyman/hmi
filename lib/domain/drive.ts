@@ -182,66 +182,39 @@ export class Drive extends Device {
 
   /**
    * Start jog positive direction
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async startJogPositive(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogPositive`, true);
+  async jogPositive(value: boolean): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xJogPositive`, value);
   }
-
-  /**
-   * Stop jog positive direction
-   * Called from UI button release
-   */
-  async stopJogPositive(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogPositive`, false);
-  }  
 
   /**
    * Start jog negative direction
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async startJogNegative(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogNegative`, true);
+  async jogNegative(value: boolean): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xJogNegative`, value);
   }
 
-  /**
-   * Stop jog negative direction
-   * Called from UI button release
-   */
-  async stopJogNegative(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xJogNegative`, false);
-  }  
 
   /**
    * Start homing sequence
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async startHomming(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xStartHomming`, true);
+  async startHomming(value: boolean): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xStartHomming`, value);
   }
-
-  /**
-   * Stop homing sequence
-   * Called from UI button release
-   */
-  async stopHomming(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xStartHomming`, false);
-  }  
 
   /**
    * Start positioning to set index
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async startPosition(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xStartPosition`, true);
-  }
-
-  /**
-   * Stop positioning
-   * Called from UI button release
-   */
-  async stopPosition(): Promise<void> {
-    await this.write(`${this.stationId}.${this.id}.xStartPosition`, false);
+  async startPosition(value: boolean): Promise<void> {
+    await this.write(`${this.stationId}.${this.id}.xStartPosition`, value);
   }
 
   /**

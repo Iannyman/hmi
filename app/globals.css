@@ -294,6 +294,10 @@
     transform: translateY(-1px);
   }
 
+  .btn-secondary:active {
+    transform: scale(0.95);
+  }
+
   /* Header/Footer with glass effect */
   .header-footer {
     background: linear-gradient(

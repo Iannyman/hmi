@@ -275,10 +275,11 @@ export class Station extends EventEmitter implements DomainObject {
 
   /**
    * Reset Station statistics
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async resetStatistics(): Promise<void> {
-    await this.write(`${this.id}.Control.xResetStatistics`, true);
+  async resetStatistics(value: boolean): Promise<void> {
+    await this.write(`${this.id}.Control.xResetStatistics`, value);
   }
 
   /**

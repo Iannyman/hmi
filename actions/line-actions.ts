@@ -33,13 +33,14 @@ export async function setLineMode(mode: LineMode) {
 }
 
 /**
- * Reset line statistics
- * Clears all production counters and statistics
+ * Reset line statistics 
+ * @param value - true to activate, false to deactivate
+ * Reset statistics of line
  */
-export async function resetLineStatistics() {
+export async function resetStatistics(value: boolean) {
   try {
     const line = HMILocator.getLine();
-    await line.resetStatistics();
+    await line.resetStatistics(value);
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -50,12 +51,13 @@ export async function resetLineStatistics() {
 
 /**
  * Acknowledge line errors
+ * @param value - true to activate, false to deactivate
  * Clears all active errors on the line
  */
-export async function acknowledgeLineErrors() {
+export async function acknowledgeLineErrors(value: boolean) {
   try {
     const line = HMILocator.getLine();
-    await line.acknowledgeErrors();
+    await line.acknowledgeErrors(value);
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

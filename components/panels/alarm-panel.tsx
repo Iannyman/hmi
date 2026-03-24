@@ -3,6 +3,7 @@
 import type { Alarm } from "@/types/alarm.types";
 import { AlertTriangle, AlertCircle, Info, CheckCircle, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface AlarmPanelProps {
   alarms: Alarm[];
@@ -79,19 +80,23 @@ export function AlarmPanel({
           )}
         </div>
         {isHistoryMode ? (
-          <button
+          <Button
             onClick={onClearHistory}
-            className="btn btn-secondary text-xs"
+            variant="outline"
+            size="lg"
+            className="px-12"
           >
             Clear
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={handleAcknowledgeAll}
-            className="btn btn-secondary text-xs"
+            variant="outline"
+            size="lg"
+            className="px-12"
           >
             Ack All
-          </button>
+          </Button>
         )}
       </div>
 
