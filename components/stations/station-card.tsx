@@ -29,6 +29,11 @@ const statusColors: Record<StationStatus, { bg: string; text: string; border: st
     text: "text-[hsl(var(--status-fault))]",
     border: "border-[hsl(var(--status-fault))]/30"
   },
+  end: {
+    bg: "bg-gradient-to-br from-[hsl(var(--status-warning))]/20 to-[hsl(var(--status-warning))]/10",
+    text: "text-[hsl(var(--status-warning))]",
+    border: "border-[hsl(var(--status-warning))]/30"
+  },   
   warning: {
     bg: "bg-gradient-to-br from-[hsl(var(--status-warning))]/20 to-[hsl(var(--status-warning))]/10",
     text: "text-[hsl(var(--status-warning))]",
@@ -67,7 +72,7 @@ export function StationCard({ station }: StationCardProps) {
   };
   // Ensure values are numbers and limit to 2 decimal places
   const nokPercentage = station.totalParts > 0
-    ? (Number(station.partNok) / Number(station.totalParts) * 100).toFixed(2)
+    ? (Number(station.partsNOK) / Number(station.totalParts) * 100).toFixed(2)
     : "0.00";
   const efficiency = Number(station.efficiency).toFixed(2);
 
@@ -82,6 +87,8 @@ export function StationCard({ station }: StationCardProps) {
       case "warning":
         return <AlertTriangle className="w-4 h-4" />;
       case "init":
+        return <HomeIcon className="w-4 h-4" />;
+      case "end":
         return <HomeIcon className="w-4 h-4" />;
       case "home":
         return <HomeIcon className="w-4 h-4" />;
@@ -98,6 +105,8 @@ export function StationCard({ station }: StationCardProps) {
         return "bg-[hsl(var(--status-fault))] text-white ";
       case "warning":
         return "bg-[hsl(var(--status-warning))] text-white";
+      case "end":
+        return "bg-[hsl(var(--status-warning))] text-white";        
       case "init":
         return "bg-[hsl(var(--status-warning))] text-white";
       case "home":
@@ -107,8 +116,6 @@ export function StationCard({ station }: StationCardProps) {
 
   const getCardAnimation = (status: StationStatus) => {
     switch (status) {
-      // case "auto":
-      //   return "card-running-glow";
       case "error":
         return "card-error-glow";
       default:
@@ -155,11 +162,11 @@ export function StationCard({ station }: StationCardProps) {
       <div className="grid grid-cols-4 gap-2 mb-4">
         <div className="bg-[hsl(var(--surface))] rounded-lg p-2 text-center">
           <div className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider mb-0.5">OK</div>
-          <div className="text-xl font-bold font-mono text-[hsl(var(--status-running))]">{station.partOk.toLocaleString()}</div>
+          <div className="text-xl font-bold font-mono text-[hsl(var(--status-running))]">{station.partsOK.toLocaleString()}</div>
         </div>
         <div className="bg-[hsl(var(--surface))] rounded-lg p-2 text-center">
           <div className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider mb-0.5">NOK</div>
-          <div className="text-xl font-bold font-mono text-[hsl(var(--status-fault))]">{station.partNok.toLocaleString()}</div>
+          <div className="text-xl font-bold font-mono text-[hsl(var(--status-fault))]">{station.partsNOK.toLocaleString()}</div>
         </div>
         <div className="bg-[hsl(var(--surface))] rounded-lg p-2 text-center">
           <div className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider mb-0.5">Total</div>
@@ -183,7 +190,7 @@ export function StationCard({ station }: StationCardProps) {
       <div className="flex gap-2">
         <Button
           size="default"
-          variant={station.mode === "auto" ? "success" : "outline"}
+          variant={station.status === "auto" ? "default" : "outline"}
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -201,7 +208,7 @@ export function StationCard({ station }: StationCardProps) {
         </Button>
         <Button
           size="default"
-          variant={"outline"}
+          variant={station.status === "home" ? "default" : "outline"}
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -219,7 +226,7 @@ export function StationCard({ station }: StationCardProps) {
         </Button>
         <Button
           size="default"
-          variant={station.mode === "setup" ? "default" : "outline"}
+          variant={station.status === "setup" ? "default" : "outline"}
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"

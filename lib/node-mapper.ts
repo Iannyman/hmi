@@ -8,7 +8,7 @@
 import { NodeIDMap, ParsedNodeId, StructureChange } from "@/types/domain.types";
 import { BrowseTreeNode } from "@/types/opcua.types";
 
-const NAMESPACE = 5;
+const NAMESPACE = Number(process.env.NEXT_PUBLIC_OPCUA_NAMESPACE) || 4; // default node in OPC UA
 
 export class NodeMapper {
   private nodeIdMap: NodeIDMap | null = null;

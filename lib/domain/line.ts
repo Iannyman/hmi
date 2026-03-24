@@ -302,7 +302,9 @@ export class Line extends EventEmitter implements DomainObject {
     if (statusLower.includes("auto")) return "auto";
     if (statusLower.includes("warn")) return "warning";
     if (statusLower.includes("init")) return "init";
+    if (statusLower.includes("home")) return "home";
     if (statusLower.includes("error")) return "error";
+    if (statusLower.includes("end")) return "end";
     return "setup";
   }
 

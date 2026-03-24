@@ -6,7 +6,7 @@ import { DeviceDTO } from "@/types/device.dto";
 
 export type StationMode = "auto" | "setup" | "init" | "end" | "home" | "error";
 
-export type StationStatus = "auto" | "setup" | "init" | "home" | "warning" | "error" ;
+export type StationStatus = "auto" | "setup" | "init" | "home" | "warning" | "error" | "end";
 
 export interface Station {
   id: string;
@@ -15,8 +15,8 @@ export interface Station {
   mode: StationMode;
   warning: string;
   message: string;
-  partOk: number;
-  partNok: number;
+  partsOK: number;
+  partsNOK: number;
   totalParts: number;
   efficiency: number;
   status: StationStatus;

@@ -55,6 +55,14 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
           borderColor: "border-[hsl(var(--status-running))]/30",
           icon: PlayCircle,
         };
+      case "home":
+        return {
+          text: "Home",
+          color: "text-[hsl(var(--status-running))]",
+          bgColor: "bg-[hsl(var(--status-running))]/10",
+          borderColor: "border-[hsl(var(--status-running))]/30",
+          icon: PlayCircle,
+        };        
       case "setup":
         return {
           text: "Setup",
@@ -93,7 +101,7 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
         <Button
           size="default"
           variant="success"
-          disabled={lineStatus === "auto" || !!loadingAction || !isInitialized}
+          disabled={!!loadingAction || !isInitialized}
           onClick={handleStart}
           className="flex-1 min-w-0 sm:flex-none sm:w-28"
         >
@@ -121,7 +129,7 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
         <Button
           size="default"
           variant="outline"
-          disabled={lineStatus === "setup" || !!loadingAction || !isInitialized}
+          disabled={!!loadingAction || !isInitialized}
           onClick={handleStop}
           className="flex-1 min-w-0 sm:flex-none sm:w-28"
         >
