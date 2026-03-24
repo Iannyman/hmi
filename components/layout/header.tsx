@@ -112,6 +112,11 @@ export function Header() {
           text: "SETUP",
           color: "bg-[hsl(var(--status-stopped))]",
         };
+      case "end":
+        return {
+          text: "INIT",
+          color: "bg-[hsl(var(--status-stopped))]",
+        };        
       case "init":
         return {
           text: "INIT",

@@ -190,7 +190,7 @@ export function StationCard({ station }: StationCardProps) {
       <div className="flex gap-2">
         <Button
           size="default"
-          variant={station.status === "auto" ? "default" : "outline"}
+          variant={"outline"}//station.status === "auto" ? "default" : "outline"
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -208,7 +208,7 @@ export function StationCard({ station }: StationCardProps) {
         </Button>
         <Button
           size="default"
-          variant={station.status === "home" ? "default" : "outline"}
+          variant={"outline"}
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -226,7 +226,7 @@ export function StationCard({ station }: StationCardProps) {
         </Button>
         <Button
           size="default"
-          variant={station.status === "setup" ? "default" : "outline"}
+          variant={"outline"}
           disabled={!!loadingAction}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"

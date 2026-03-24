@@ -71,6 +71,14 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
           borderColor: "border-[hsl(var(--border))]",
           icon: PauseCircle,
         };
+      case "end":
+        return {
+          text: "End cycle",
+          color: "text-[hsl(var(--text-muted))]",
+          bgColor: "bg-[hsl(var(--surface))]",
+          borderColor: "border-[hsl(var(--border))]",
+          icon: PauseCircle,
+        };        
       case "error":
         return {
           text: "Fault",
