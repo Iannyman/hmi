@@ -1,0 +1,3 @@
+# Customize how CodeRabbit generates the PR title
+auto_title_instructions: "Use a concise, imperative tone. Include the component name in brackets."
+auto_title_placeholder: "@coderabbitai"
