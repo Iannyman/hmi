@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, Package, CheckCircle, XCircle, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHMIManager } from "@/hooks/use-hmi-manager";
-import { resetLineStatistics } from "@/actions/line-actions";
+import { resetStatistics } from "@/actions/line-actions";
 
 interface LineStatisticsPanelProps {
   className?: string;
@@ -51,14 +51,14 @@ export function LineStatisticsPanel({ className }: LineStatisticsPanelProps) {
     },
   ];
 
-  const handleReset = async () => {
+  const handleResetStatistics = async (value: boolean) => {
     try {
-      const result = await resetLineStatistics();
+      const result = await resetStatistics(value);
       if (!result.success) {
-        console.error("Failed to reset statistics:", result.error);
+        console.error("Failed to set reset statistics:", result.error);
       }
     } catch (err) {
-      console.error("Failed to reset statistics:", err);
+      console.error("Failed to set reset statistics:", err);
     }
   };
 
@@ -92,7 +92,11 @@ export function LineStatisticsPanel({ className }: LineStatisticsPanelProps) {
           <Button
             size="default"
             variant="outline"
-            onClick={handleReset}
+            onMouseDown={() => handleResetStatistics(true)}
+            onMouseUp={() => handleResetStatistics(false)}
+            onMouseLeave={() => handleResetStatistics(false)}
+            onTouchStart={() => handleResetStatistics(true)}
+            onTouchEnd={() => handleResetStatistics(false)}
             disabled={!isInitialized}
             className="gap-2"
           >

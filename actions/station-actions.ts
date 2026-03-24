@@ -39,16 +39,17 @@ export async function setStationMode(stationId: string, mode: StationMode) {
 /**
  * Reset station statistics
  * @param stationId - The ID of the station
+ * @param value - true to activate, false to deactivate
  * Clears all production counters and statistics for the station
  */
-export async function resetStationStatistics(stationId: string) {
+export async function resetStationStatistics(stationId: string, value: boolean) {
   try {
     const station = HMILocator.getStation(stationId);
     if (!station) {
       return { success: false, error: `Station ${stationId} not found` };
     }
 
-    await station.resetStatistics();
+    await station.resetStatistics(value);
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

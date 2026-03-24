@@ -9,7 +9,7 @@
 
 import { HMILocator } from "@/lib/hmi-locator";
 
-export async function startJogPositive(stationId: string, driveId: string) {
+export async function jogPositive(stationId: string, driveId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -20,11 +20,11 @@ export async function startJogPositive(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).startJogPositive();
+  await (drive as any).jogPositive(value);
   return { success: true };
 }
 
-export async function stopJogPositive(stationId: string, driveId: string) {
+export async function jogNegative(stationId: string, driveId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -35,11 +35,11 @@ export async function stopJogPositive(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).stopJogPositive();
+  await (drive as any).jogNegative(value);
   return { success: true };
 }
 
-export async function startJogNegative(stationId: string, driveId: string) {
+export async function startHoming(stationId: string, driveId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -50,11 +50,11 @@ export async function startJogNegative(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).startJogNegative();
+  await (drive as any).startHomming(value);
   return { success: true };
 }
 
-export async function stopJogNegative(stationId: string, driveId: string) {
+export async function startPositioning(stationId: string, driveId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -65,67 +65,7 @@ export async function stopJogNegative(stationId: string, driveId: string) {
     return { success: false, error: "Drive not found" };
   }
 
-  await (drive as any).stopJogNegative();
-  return { success: true };
-}
-
-export async function startHoming(stationId: string, driveId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const drive = station.getDevice(driveId);
-  if (!drive || drive.type !== 'drive') {
-    return { success: false, error: "Drive not found" };
-  }
-
-  await (drive as any).startHomming();
-  return { success: true };
-}
-
-export async function stopHoming(stationId: string, driveId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const drive = station.getDevice(driveId);
-  if (!drive || drive.type !== 'drive') {
-    return { success: false, error: "Drive not found" };
-  }
-
-  await (drive as any).stopHomming();
-  return { success: true };
-}
-
-export async function startPositioning(stationId: string, driveId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const drive = station.getDevice(driveId);
-  if (!drive || drive.type !== 'drive') {
-    return { success: false, error: "Drive not found" };
-  }
-
-  await (drive as any).startPosition();
-  return { success: true };
-}
-
-export async function stopPositioning(stationId: string, driveId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const drive = station.getDevice(driveId);
-  if (!drive || drive.type !== 'drive') {
-    return { success: false, error: "Drive not found" };
-  }
-
-  await (drive as any).stopPosition();
+  await (drive as any).startPosition(value);
   return { success: true };
 }
 

@@ -204,20 +204,23 @@ export class Line extends EventEmitter implements DomainObject {
   // Methods (for UI buttons) - convenience wrappers around write()
 
   /**
-   * Reset Line statistics
+   * Reset line statistics
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async resetStatistics(): Promise<void> {
-    await this.write("Line.xResetStatistics", true);
+  async resetStatistics(value: boolean): Promise<void> {
+    await this.write("Line.xResetStatistics", value);
   }
 
   /**
    * Acknowledge Line errors
+   * @param value - true to activate, false to deactivate
    * Called from UI button
    */
-  async acknowledgeErrors(): Promise<void> {
-    await this.write("Line.xAckErrors", true);
+  async acknowledgeErrors(value: boolean): Promise<void> {
+    await this.write("Line.xAckErrors", value);
   }
+
 
   /**
    * Set Line mode

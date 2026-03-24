@@ -81,14 +81,14 @@ export function AlarmPanel({
         {isHistoryMode ? (
           <button
             onClick={onClearHistory}
-            className="btn btn-secondary text-xs"
+            className="btn btn-secondary text-xs px-12 py-4"
           >
             Clear
           </button>
         ) : (
           <button
             onClick={handleAcknowledgeAll}
-            className="btn btn-secondary text-xs"
+            className="btn btn-secondary text-xs px-12 py-4"
           >
             Ack All
           </button>

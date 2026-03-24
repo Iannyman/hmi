@@ -209,7 +209,11 @@ function DevicesContent() {
               size="sm"
               className="ml-auto gap-2"
               disabled={!isInitialized || !stationId}
-              onClick={() => stationId && resetStationStatistics(stationId)}
+              onMouseDown={() => stationId && resetStationStatistics(stationId, true)}
+              onMouseUp={() => stationId && resetStationStatistics(stationId, false)}
+              onMouseLeave={() => stationId && resetStationStatistics(stationId, false)}
+              onTouchStart={() => stationId && resetStationStatistics(stationId, true)}
+              onTouchEnd={() => stationId && resetStationStatistics(stationId, false)}
             >
               <RotateCcw className="w-4 h-4" />
               Reset Stats

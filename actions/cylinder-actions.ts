@@ -9,7 +9,7 @@
 
 import { HMILocator } from "@/lib/hmi-locator";
 
-export async function startMoveToWorkPosition(stationId: string, cylinderId: string) {
+export async function moveToWorkPosition(stationId: string, cylinderId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -20,11 +20,12 @@ export async function startMoveToWorkPosition(stationId: string, cylinderId: str
     return { success: false, error: "Cylinder not found" };
   }
 
-  await (cylinder as any).startMoveToWorkPosition();
+  await (cylinder as any).moveToWorkPosition(value);
   return { success: true };
 }
 
-export async function stopMoveToWorkPosition(stationId: string, cylinderId: string) {
+
+export async function moveToHomePosition(stationId: string, cylinderId: string, value: boolean) {
   const station = HMILocator.getStation(stationId);
   if (!station) {
     return { success: false, error: "Station not found" };
@@ -35,39 +36,10 @@ export async function stopMoveToWorkPosition(stationId: string, cylinderId: stri
     return { success: false, error: "Cylinder not found" };
   }
 
-  await (cylinder as any).stopMoveToWorkPosition();
+  await (cylinder as any).moveToHomePosition(value);
   return { success: true };
 }
 
-export async function startMoveToHomePosition(stationId: string, cylinderId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const cylinder = station.getDevice(cylinderId);
-  if (!cylinder || cylinder.type !== 'cylinder') {
-    return { success: false, error: "Cylinder not found" };
-  }
-
-  await (cylinder as any).startMoveToHomePosition();
-  return { success: true };
-}
-
-export async function stopMoveToHomePosition(stationId: string, cylinderId: string) {
-  const station = HMILocator.getStation(stationId);
-  if (!station) {
-    return { success: false, error: "Station not found" };
-  }
-
-  const cylinder = station.getDevice(cylinderId);
-  if (!cylinder || cylinder.type !== 'cylinder') {
-    return { success: false, error: "Cylinder not found" };
-  }
-
-  await (cylinder as any).stopMoveToHomePosition();
-  return { success: true };
-}
 
 export async function setTimeout(stationId: string, cylinderId: string, timeout: number) {
   const station = HMILocator.getStation(stationId);

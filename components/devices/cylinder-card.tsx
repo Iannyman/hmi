@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ChevronRight, ChevronLeft, Gauge, Clock, AlertTriangle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { startMoveToWorkPosition, stopMoveToWorkPosition, startMoveToHomePosition, stopMoveToHomePosition, setTimeout as setCylinderTimeout } from "@/actions/cylinder-actions";
+import { moveToWorkPosition, moveToHomePosition, setTimeout as setCylinderTimeout } from "@/actions/cylinder-actions";
 import { DeviceDTO } from "@/types/device.dto";
 
 interface CylinderCardProps {
@@ -88,37 +88,21 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
     };
   }, []);
 
-  const handleStartMoveToWork = async () => {
+  const handleMoveToWork = async (value: boolean) => {
     if (!cylinder.stationId) return;
-    const result = await startMoveToWorkPosition(cylinder.stationId, cylinder.id);
+    const result = await moveToWorkPosition(cylinder.stationId, cylinder.id, value);
     if (!result.success) {
       console.error("Failed to start move to work position:", result.error);
     }
   };
 
-  const handleStopMoveToWork = async () => {
+  const handleMoveToHome = async (value: boolean) => {
     if (!cylinder.stationId) return;
-    const result = await stopMoveToWorkPosition(cylinder.stationId, cylinder.id);
-    if (!result.success) {
-      console.error("Failed to stop move to work position:", result.error);
-    }
-  };
-
-  const handleStartMoveToHome = async () => {
-    if (!cylinder.stationId) return;
-    const result = await startMoveToHomePosition(cylinder.stationId, cylinder.id);
+    const result = await moveToHomePosition(cylinder.stationId, cylinder.id, value);
     if (!result.success) {
       console.error("Failed to start move to home position:", result.error);
     }
   };
-
-  const handleStopMoveToHome = async () => {
-    if (!cylinder.stationId) return;
-    const result = await stopMoveToHomePosition(cylinder.stationId, cylinder.id);
-    if (!result.success) {
-      console.error("Failed to stop move to home position:", result.error);
-    }
-  };  
 
   // Refactor station name
   const stationName = cylinder.stationId.replace(/_/g, ' ');
@@ -237,11 +221,11 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
           )}
-          onMouseDown={handleStartMoveToWork}
-          onMouseUp={handleStopMoveToWork}
-          onMouseLeave={handleStopMoveToWork}
-          onTouchStart={handleStartMoveToWork}
-          onTouchEnd={handleStopMoveToWork}
+          onMouseDown={() => handleMoveToWork(true)}
+          onMouseUp={() => handleMoveToWork(false)}
+          onMouseLeave={() => handleMoveToWork(false)}
+          onTouchStart={() => handleMoveToWork(true)}
+          onTouchEnd={() => handleMoveToWork(false)}
           disabled={!cylinder.enabled || !cylinder.enableWorkPosition}
         >
           {(
@@ -256,11 +240,11 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
           )}
-          onMouseDown={handleStartMoveToHome}
-          onMouseUp={handleStopMoveToHome}
-          onMouseLeave={handleStopMoveToHome}
-          onTouchStart={handleStartMoveToHome}
-          onTouchEnd={handleStopMoveToHome}
+          onMouseDown={() => handleMoveToHome(true)}
+          onMouseUp={() => handleMoveToHome(false)}
+          onMouseLeave={() => handleMoveToHome(false)}
+          onTouchStart={() => handleMoveToHome(true)}
+          onTouchEnd={() => handleMoveToHome(false)}
           disabled={!cylinder.enabled || !cylinder.enableHomePosition}
         >
           {(

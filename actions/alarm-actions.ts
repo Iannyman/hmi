@@ -67,7 +67,7 @@ export async function acknowledgeAlarm(alarmId: string): Promise<{ success: bool
     AlarmLocator.acknowledgeAlarm(alarmId);
 
     // Send acknowledge signal to the PLC
-    const lineResult = await acknowledgeLineErrors();
+    const lineResult = await acknowledgeLineErrors(true);
     if (!lineResult.success) {
       console.warn("[Acknowledge Alarm Action] Failed to acknowledge line errors:", lineResult.error);
     }
@@ -109,7 +109,7 @@ export async function acknowledgeAllAlarms(): Promise<{ success: boolean; acknow
     }
 
     // Send acknowledge signal to the PLC once (not per alarm)
-    const lineResult = await acknowledgeLineErrors();
+    const lineResult = await acknowledgeLineErrors(true);
     if (!lineResult.success) {
       console.warn("[Acknowledge All Alarms Action] Failed to acknowledge line errors:", lineResult.error);
     }

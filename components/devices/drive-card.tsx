@@ -7,17 +7,7 @@ import { Move, Home, SkipForward, SkipBack, AlertTriangle, Gauge, Target } from 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { DeviceDTO } from "@/types/device.dto";
-import {
-  startJogPositive,
-  stopJogPositive,
-  startJogNegative,
-  stopJogNegative,
-  startHoming,
-  stopHoming,
-  startPositioning,
-  stopPositioning,
-  setPositionIndex
-} from "@/actions/drive-actions";
+import { jogPositive, jogNegative, startHoming, startPositioning, setPositionIndex } from "@/actions/drive-actions";
 
 interface DriveCardProps {
   drive: Extract<DeviceDTO, { type: "drive" }>;
@@ -61,53 +51,29 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
     }, 500); // 500ms debounce
   };
 
-  const handleStartHoming = async () => {
+  const handleStartHoming = async (value: boolean) => {
     if (!drive.stationId) return;
-    const result = await startHoming(drive.stationId, drive.id);
+    const result = await startHoming(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start homing:", result.error);
   };
 
-  const handleStopHoming = async () => {
+  const handleStartPositioning = async (value: boolean) => {
     if (!drive.stationId) return;
-    const result = await stopHoming(drive.stationId, drive.id);
-    if (!result.success) console.error("Failed to stop homing:", result.error);
-  };
-
-  const handleStartPositioning = async () => {
-    if (!drive.stationId) return;
-    const result = await startPositioning(drive.stationId, drive.id);
+    const result = await startPositioning(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start positioning:", result.error);
   };  
 
-  const handleStopPositioning = async () => {
+  const handleJogPositive = async (value: boolean) => {
     if (!drive.stationId) return;
-    const result = await stopPositioning(drive.stationId, drive.id);
-    if (!result.success) console.error("Failed to stop positioning:", result.error);
-  };    
-
-  const handleStartJogPositive = async () => {
-    if (!drive.stationId) return;
-    const result = await startJogPositive(drive.stationId, drive.id);
+    const result = await jogPositive(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start jog positive:", result.error);
   };    
 
-  const handleStopJogPositive = async () => {
+  const handleJogNegative = async (value: boolean) => {
     if (!drive.stationId) return;
-    const result = await stopJogPositive(drive.stationId, drive.id);
-    if (!result.success) console.error("Failed to stop jog positive:", result.error);
-  };    
-
-  const handleStartJogNegative = async () => {
-    if (!drive.stationId) return;
-    const result = await startJogNegative(drive.stationId, drive.id);
+    const result = await jogNegative(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start jog negative:", result.error);
   };    
-
-  const handleStopJogNegative = async () => {
-    if (!drive.stationId) return;
-    const result = await stopJogNegative(drive.stationId, drive.id);
-    if (!result.success) console.error("Failed to stop jog negative:", result.error);
-  }; 
 
   // Refactor station name
   const stationName = drive.stationId.replace(/_/g, ' ');
@@ -201,11 +167,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={false}
-          onMouseDown={handleStartHoming}
-          onMouseUp={handleStopHoming}
-          onMouseLeave={handleStopHoming}
-          onTouchStart={handleStartHoming}
-          onTouchEnd={handleStopHoming}
+          onMouseDown={() => handleStartHoming(true)}
+          onMouseUp={() => handleStartHoming(false)}
+          onMouseLeave={() => handleStartHoming(false)}
+          onTouchStart={() => handleStartHoming(true)}
+          onTouchEnd={() => handleStartHoming(false)}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -218,11 +184,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enPositioning}
-          onMouseDown={handleStartPositioning}
-          onMouseUp={handleStopPositioning}
-          onMouseLeave={handleStopPositioning}
-          onTouchStart={handleStartPositioning}
-          onTouchEnd={handleStopPositioning}
+          onMouseDown={() => handleStartPositioning(true)}
+          onMouseUp={() => handleStartPositioning(false)}
+          onMouseLeave={() => handleStartPositioning(false)}
+          onTouchStart={() => handleStartPositioning(true)}
+          onTouchEnd={() => handleStartPositioning(false)}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -235,11 +201,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enForward}
-          onMouseDown={handleStartJogPositive}
-          onMouseUp={handleStopJogPositive}
-          onMouseLeave={handleStopJogPositive}
-          onTouchStart={handleStartJogPositive}
-          onTouchEnd={handleStopJogPositive}
+          onMouseDown={() => handleJogPositive(true)}
+          onMouseUp={() => handleJogPositive(false)}
+          onMouseLeave={() => handleJogPositive(false)}
+          onTouchStart={() => handleJogPositive(true)}
+          onTouchEnd={() => handleJogPositive(false)}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
@@ -252,11 +218,11 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           size="default"
           variant="outline"
           disabled={!drive.enBackward}
-          onMouseDown={handleStartJogNegative}
-          onMouseUp={handleStopJogNegative}
-          onMouseLeave={handleStopJogNegative}
-          onTouchStart={handleStartJogNegative}
-          onTouchEnd={handleStopJogNegative}
+          onMouseDown={() => handleJogNegative(true)}
+          onMouseUp={() => handleJogNegative(false)}
+          onMouseLeave={() => handleJogNegative(false)}
+          onTouchStart={() => handleJogNegative(true)}
+          onTouchEnd={() => handleJogNegative(false)}
           className={cn(
             "flex-1 min-w-0 font-semibold text-xs sm:text-sm button-container px-2 sm:px-3",
             "border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
