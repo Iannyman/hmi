@@ -11,7 +11,7 @@
 // Base Types
 // ============================================================================
 
-export type LineStatus = "auto" | "setup" | "init" | "warning" | "error" ;
+export type LineStatus = "auto" | "setup" | "init" | "warning" | "error" | "home" | "end";
 export type LineMode = "auto" | "setup" | "init" | "end" | "error";
 
 /**

@@ -102,11 +102,21 @@ export function Header() {
           text: "AUTO",
           color: "bg-[hsl(var(--status-running))]",
         };
+      case "home":
+        return {
+          text: "HOME",
+          color: "bg-[hsl(var(--status-stopped))]",
+        };        
       case "setup":
         return {
           text: "SETUP",
           color: "bg-[hsl(var(--status-stopped))]",
         };
+      case "end":
+        return {
+          text: "INIT",
+          color: "bg-[hsl(var(--status-stopped))]",
+        };        
       case "init":
         return {
           text: "INIT",
@@ -163,13 +173,8 @@ export function Header() {
           <div className="w-10 h-10 bg-gradient-to-br from-[hsl(var(--accent))] to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-xl group-hover:shadow-blue-500/30 transition-all duration-300">
             <Factory className="w-5 h-5 text-white" strokeWidth={2} />
           </div>
-          <span className="font-semibold tracking-tight hidden sm:inline text-gradient-accent">HMI</span>
+          <span className="font-semibold tracking-tight hidden sm:inline text-gradient-accent">{lineName}</span>
         </Link>
-
-        <div className="hidden md:flex items-center gap-4 text-sm">
-          <span className="text-[hsl(var(--text-muted))]">{lineName}</span>
-          <span className="text-[hsl(var(--text-dim))]">|</span>
-        </div>
       </div>
 
       {/* Center - Status on mobile, full stats on desktop */}
