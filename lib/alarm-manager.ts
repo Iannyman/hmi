@@ -103,19 +103,17 @@ export class AlarmManager extends EventEmitter {
       const devices = station.getDevices();
 
       for (const device of devices) {
-        // Check if this is a Cylinder and has an error
-        if (device.type === "cylinder") {
-          const cylinder = device as any; // Cast to access cylinder-specific properties
-          if (cylinder.errorMessage && cylinder.errorMessage !== "") {
-            const errorData: DeviceErrorEvent = {
-              stationId: station.id,
-              deviceId: device.id,
-              deviceName: (device as any).getName?.() || device.id,
-              errorMessage: cylinder.errorMessage,
-            };
-            this.createAlarm(errorData);
-            foundErrors++;
-          }
+        // Check if device has errorMessage property and has an error
+        const deviceWithError = device as any; // Cast to access errorMessage property
+        if (deviceWithError.errorMessage && deviceWithError.errorMessage !== "") {
+          const errorData: DeviceErrorEvent = {
+            stationId: station.id,
+            deviceId: device.id,
+            deviceName: deviceWithError.name || device.id,
+            errorMessage: deviceWithError.errorMessage,
+          };
+          this.createAlarm(errorData);
+          foundErrors++;
         }
       }
     }
