@@ -26,6 +26,7 @@ export default function DashboardPage() {
       mode: hmiStation.mode,
       warning: hmiStation.warning,
       message: hmiStation.message,
+      disabled: hmiStation.disabled,
       partsOK: hmiStation.partsOK,
       partsNOK: hmiStation.partsNOK,
       totalParts: hmiStation.partsOK + hmiStation.partsNOK,

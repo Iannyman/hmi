@@ -546,6 +546,7 @@ export class Station extends EventEmitter implements DomainObject {
     if (statusLower.includes("home")) return "home";
     if (statusLower.includes("error")) return "error";
     if (statusLower.includes("end")) return "end";
+    if (statusLower.includes("disabled")) return "disabled";
     return "setup";
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Settings, User, Menu, Factory, ChevronLeft } from "lucide-react";
+import { Bell, Settings, User, Menu, Factory, PanelLeft} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useCallback } from "react";
 import { useSidebar } from "@/components/providers/sidebar-provider";
@@ -167,7 +167,7 @@ export function Header() {
           className="p-3 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text))] transition-all duration-200 rounded-lg hover:bg-[hsl(var(--surface))]"
           aria-label="Toggle sidebar"
         >
-          {isOpen ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {isOpen ? <PanelLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <Link href="/dashboard" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-gradient-to-br from-[hsl(var(--accent))] to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-xl group-hover:shadow-blue-500/30 transition-all duration-300">
