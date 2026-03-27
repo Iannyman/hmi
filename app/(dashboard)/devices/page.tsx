@@ -19,6 +19,7 @@ import { useHMIManager } from "@/hooks/use-hmi-manager";
 import { DeviceStatus } from "@/types/device.types";
 import { DeviceType } from "@/types/device.types";
 import { DeviceDTO } from "@/types/device.dto";
+import { StationStatus } from "@/types/station.types";
 import Link from "next/link";
 
 type FilterType = "all" | DeviceType;
@@ -118,7 +119,19 @@ function DevicesContent() {
     return true;
   });
 
+  // Map stationId -> station status for device cards to look up their parent station
+  const stationStatusMap = useMemo(() => {
+    const map = new Map<string, StationStatus | undefined>();
+    for (const s of stations) {
+      map.set(s.id, s.status as StationStatus);
+    }
+    return map;
+  }, [stations]);
+
   const renderDeviceCard = (device: (typeof filteredDevices)[0]) => {
+    // Look up this device's parent station status
+    const deviceStationStatus = stationStatusMap.get(device.stationId);
+
     switch (device.type) {
       case "motor":
         return <MotorCard key={device.uniqueKey} motor={device} />;
@@ -131,9 +144,9 @@ function DevicesContent() {
       case "conveyor":
         return <ConveyorCard key={device.uniqueKey} conveyor={device} />;
       case "drive":
-        return <DriveCard key={device.uniqueKey} drive={device} stationStatus={station?.status}/>;
+        return <DriveCard key={device.uniqueKey} drive={device} stationStatus={deviceStationStatus}/>;
       case "cylinder":
-        return <CylinderCard key={device.uniqueKey} cylinder={device} stationStatus={station?.status}/>;
+        return <CylinderCard key={device.uniqueKey} cylinder={device} stationStatus={deviceStationStatus}/>;
       default:
         return null;
     }
