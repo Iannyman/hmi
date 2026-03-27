@@ -215,15 +215,7 @@ export async function GET(request: NextRequest) {
       hmi.on("station:updated", onStationUpdated);
       hmi.on("device:updated", onDeviceUpdated);
 
-      // Register Alarm event listeners (if AlarmManager is initialized)
-      if (AlarmLocator.isReady()) {
-        const alarmManager = AlarmLocator.getInstance();
-        alarmManager.on("alarm:added", onAlarmAdded);
-        alarmManager.on("alarm:acknowledged", onAlarmAcknowledged);
-        console.log("[SSE] Alarm event listeners registered");
-      }
-
-      // Send initial data
+      // Send initial data (including alarm replay BEFORE attaching live listeners)
       try {
         const line = hmi.getLine();
         onLineUpdated(line);
@@ -231,17 +223,27 @@ export async function GET(request: NextRequest) {
         const stations = hmi.getAllStations();
         stations.forEach(onStationUpdated);
 
-        // Send existing unacknowledged alarms
+        // Replay existing unacknowledged alarms
+        // IMPORTANT: This happens BEFORE attaching live listeners to prevent duplicates
         if (AlarmLocator.isReady()) {
           const alarmManager = AlarmLocator.getInstance();
           const existingAlarms = alarmManager.getUnacknowledgedAlarms();
           if (existingAlarms.length > 0) {
-            console.log(`[SSE] Sending ${existingAlarms.length} existing alarms to new client`);
+            console.log(`[SSE] Replaying ${existingAlarms.length} existing alarms to new client`);
             existingAlarms.forEach(alarm => onAlarmAdded(alarm));
           }
         }
       } catch (err) {
         console.error("[SSE] Error sending initial data:", err);
+      }
+
+      // Register Alarm event listeners AFTER initial replay
+      // This prevents duplicate alarms if an event fires during replay
+      if (AlarmLocator.isReady()) {
+        const alarmManager = AlarmLocator.getInstance();
+        alarmManager.on("alarm:added", onAlarmAdded);
+        alarmManager.on("alarm:acknowledged", onAlarmAcknowledged);
+        console.log("[SSE] Alarm event listeners registered");
       }
 
       // Keep-alive: send a comment periodically to prevent timeout
