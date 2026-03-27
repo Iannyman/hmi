@@ -131,9 +131,9 @@ function DevicesContent() {
       case "conveyor":
         return <ConveyorCard key={device.uniqueKey} conveyor={device} />;
       case "drive":
-        return <DriveCard key={device.uniqueKey} drive={device} />;
+        return <DriveCard key={device.uniqueKey} drive={device} stationStatus={station?.status}/>;
       case "cylinder":
-        return <CylinderCard key={device.uniqueKey} cylinder={device} />;
+        return <CylinderCard key={device.uniqueKey} cylinder={device} stationStatus={station?.status}/>;
       default:
         return null;
     }

@@ -8,9 +8,12 @@ import { ChevronRight, ChevronLeft, Gauge, Clock, AlertTriangle } from "lucide-r
 import { useState, useEffect, useRef } from "react";
 import { moveToWorkPosition, moveToHomePosition, setTimeout as setCylinderTimeout } from "@/actions/cylinder-actions";
 import { DeviceDTO } from "@/types/device.dto";
+import { StationStatus } from "@/types/station.types";
+
 
 interface CylinderCardProps {
   cylinder: Extract<DeviceDTO, { type: "cylinder" }>;
+  stationStatus?: StationStatus;
   // Optional display values
   pressure?: number;
   cycleTime?: number;
@@ -38,12 +41,19 @@ const getLabelWP = (details: string): string => {
   return parts[2] || "Work Position";
 };
 
-export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }: CylinderCardProps) {
+
+export function CylinderCard({ cylinder, stationStatus, pressure = 8, cycleTime = 0, onClick }: CylinderCardProps) {
   // Extract labels from details string
   const name = getName(cylinder.details);
   const labelHP = getLabelHP(cylinder.details);
   const labelWP = getLabelWP(cylinder.details);
   const hasError = Boolean(cylinder.errorMessage);
+
+    // Refactor station name
+  const stationName = cylinder.stationId.replace(/_/g, ' ');
+
+  // Disable cylinder controls when station is in automatic mode
+  const isStationAuto = stationStatus === "auto" ;
 
   // Local state for timeout input with debouncing 
   const [timeoutValue, setTimeoutValue] = useState(cylinder.timeout ?? 0);
@@ -103,9 +113,6 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
       console.error("Failed to start move to home position:", result.error);
     }
   };
-
-  // Refactor station name
-  const stationName = cylinder.stationId.replace(/_/g, ' ');
 
   return (
     <BaseDeviceCard
@@ -226,7 +233,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
           onMouseLeave={() => handleMoveToWork(false)}
           onTouchStart={() => handleMoveToWork(true)}
           onTouchEnd={() => handleMoveToWork(false)}
-          disabled={!cylinder.enabled || !cylinder.enableWorkPosition}
+          disabled={!cylinder.enabled || !cylinder.enableWorkPosition || isStationAuto}
         >
           {(
             <ChevronRight className="cylinder-button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
@@ -245,7 +252,7 @@ export function CylinderCard({ cylinder, pressure = 8, cycleTime = 0, onClick }:
           onMouseLeave={() => handleMoveToHome(false)}
           onTouchStart={() => handleMoveToHome(true)}
           onTouchEnd={() => handleMoveToHome(false)}
-          disabled={!cylinder.enabled || !cylinder.enableHomePosition}
+          disabled={!cylinder.enabled || !cylinder.enableHomePosition || isStationAuto}
         >
           {(
             <ChevronLeft className="cylinder-button-icon w-4 h-4 sm:w-5 sm:h-5 mr-1 flex-shrink-0" />
