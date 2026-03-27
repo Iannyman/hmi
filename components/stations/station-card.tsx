@@ -3,7 +3,7 @@
 import { Station, StationMode } from "@/types/station.types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Factory, CheckCircle, Play, Hand, RotateCcw, AlertTriangle, Activity, HomeIcon, Loader2 } from "lucide-react";
+import { Factory, CheckCircle, Play, Hand, RotateCcw, AlertTriangle, Activity, HomeIcon, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { setStationMode } from "@/actions/station-actions";
@@ -18,6 +18,11 @@ const statusColors: Record<StationStatus, { bg: string; text: string; border: st
     bg: "bg-gradient-to-br from-[hsl(var(--status-running))]/20 to-[hsl(var(--status-running))]/10",
     text: "text-[hsl(var(--status-running))]",
     border: "border-[hsl(var(--status-running))]/30"
+  },
+  disabled: {
+    bg: "bg-gradient-to-br from-[hsl(var(--status-stopped))]/20 to-[hsl(var(--status-stopped))]/10",
+    text: "text-[hsl(var(--status-stopped))]",
+    border: "border-[hsl(var(--status-stopped))]/30"
   },
   setup: {
     bg: "bg-gradient-to-br from-[hsl(var(--status-warning))]/20 to-[hsl(var(--status-warning))]/10",
@@ -80,6 +85,8 @@ export function StationCard({ station }: StationCardProps) {
     switch (status) {
       case "auto":
         return <Play className="w-4 h-4" />;
+      case "disabled":
+        return <X className="w-4 h-4" />;        
       case "setup":
         return <Hand className="w-4 h-4" />;
       case "error":
@@ -99,6 +106,8 @@ export function StationCard({ station }: StationCardProps) {
     switch (status) {
       case "auto":
         return "bg-[hsl(var(--status-running))] text-white";
+      case "disabled":
+        return "bg-[hsl(var(--status-stopped))] text-muted";        
       case "setup":
         return "bg-[hsl(var(--status-warning))] text-white";
       case "error":
@@ -191,7 +200,7 @@ export function StationCard({ station }: StationCardProps) {
         <Button
           size="default"
           variant={"outline"}//station.status === "auto" ? "default" : "outline"
-          disabled={!!loadingAction}
+          disabled={!!loadingAction || station.status == "disabled"}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
           onClick={(e) => {
@@ -209,7 +218,7 @@ export function StationCard({ station }: StationCardProps) {
         <Button
           size="default"
           variant={"outline"}
-          disabled={!!loadingAction}
+          disabled={!!loadingAction || station.status == "disabled"}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
           onClick={(e) => {
@@ -227,7 +236,7 @@ export function StationCard({ station }: StationCardProps) {
         <Button
           size="default"
           variant={"outline"}
-          disabled={!!loadingAction}
+          disabled={!!loadingAction || station.status == "disabled"}
           className="flex-1 min-w-0 font-semibold transition-all duration-200 text-sm button-container px-4 py-6 h-auto
             border-2 border-[hsl(var(--border-strong))] hover:border-[hsl(var(--border-accent))] hover:bg-[hsl(var(--surface-hover))]"
           onClick={(e) => {

@@ -7,10 +7,10 @@ import { SensorCard } from "@/components/devices/sensor-card";
 import { ConveyorCard } from "@/components/devices/conveyor-card";
 import { DriveCard } from "@/components/devices/drive-card";
 import { CylinderCard } from "@/components/devices/cylinder-card";
-import { resetStationStatistics } from "@/actions/station-actions";
+import { resetStationStatistics, toggleStation } from "@/actions/station-actions";
 import { useState, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, RotateCcw , X} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
@@ -44,8 +44,8 @@ function DevicesContent() {
       warning: hmiStation.warning,
       message: hmiStation.message,
       mode: hmiStation.mode,
-      partOk: hmiStation.partsOK,
-      partNok: hmiStation.partsNOK,
+      partsOk: hmiStation.partsOK,
+      partsNok: hmiStation.partsNOK,
       totalParts: hmiStation.partsOK + hmiStation.partsNOK,
       efficiency: hmiStation.efficiency,
       status: hmiStation.status,
@@ -54,7 +54,7 @@ function DevicesContent() {
   }, [hmiStation, stationId]);
 
   const nokPercentage = station?.totalParts && station.totalParts > 0
-    ? ((station.partNok / station.totalParts) * 100).toFixed(1)
+    ? ((station.partsNok / station.totalParts) * 100).toFixed(1)
     : "0.0";
 
   const deviceTypes: { value: FilterType; label: string }[] = [
@@ -179,17 +179,17 @@ function DevicesContent() {
 
         {/* Station Statistics */}
         {station && (
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="bg-[hsl(var(--surface))] rounded-lg px-4 py-2 text-center min-w-[80px]">
               <div className="text-xs text-[hsl(var(--text-dim))] uppercase tracking-wider mb-1">OK</div>
               <div className="text-xl font-bold font-mono text-[hsl(var(--text-primary))]">
-                {station.partOk.toLocaleString()}
+                {station.partsOk.toLocaleString()}
               </div>
             </div>
             <div className="bg-[hsl(var(--surface))] rounded-lg px-4 py-2 text-center min-w-[80px]">
               <div className="text-xs text-[hsl(var(--text-dim))] uppercase tracking-wider mb-1">NOK</div>
               <div className="text-xl font-bold font-mono text-[hsl(var(--status-error))]">
-                {station.partNok.toLocaleString()}
+                {station.partsNok.toLocaleString()}
               </div>
             </div>
             <div className="bg-[hsl(var(--surface))] rounded-lg px-4 py-2 text-center min-w-[80px]">
@@ -204,10 +204,11 @@ function DevicesContent() {
                 {nokPercentage}%
               </div>
             </div>
+            {/* Reset statistics button */}
             <Button
               variant="outline"
-              size="sm"
-              className="ml-auto gap-2"
+              size="lg"
+              className="gap-2"
               disabled={!isInitialized || !stationId}
               onMouseDown={() => stationId && resetStationStatistics(stationId, true)}
               onMouseUp={() => stationId && resetStationStatistics(stationId, false)}
@@ -217,6 +218,26 @@ function DevicesContent() {
             >
               <RotateCcw className="w-4 h-4" />
               Reset Stats
+            </Button>
+            {/* Enable / Disable station button */}
+            <Button
+              variant={"outline"}
+              size="lg"
+              className="ml-auto gap-2"
+              disabled={!isInitialized || !stationId}
+              onClick={() => stationId && toggleStation(stationId)}
+            >
+              
+              {hmiStation?.disabled ? (
+                <>
+                  Enable Station
+                </>
+              ) : (
+                <>
+                  <X className="w-4 h-4" />
+                  Disable Station
+                </>
+              )}
             </Button>
           </div>
         )}

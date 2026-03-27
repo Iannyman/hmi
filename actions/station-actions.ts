@@ -9,6 +9,7 @@
 
 import { HMILocator } from "@/lib/hmi-locator";
 import { StationMode } from "@/types/station.types";
+import { log } from "console";
 
 /**
  * Set the station mode
@@ -54,6 +55,33 @@ export async function resetStationStatistics(stationId: string, value: boolean) 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[Station Reset Statistics Action] Failed for ${stationId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Toggle station enabled/disabled state
+ * @param stationId - The ID of the station
+ * If station is disabled, enables it
+ * If station is enabled, disables it
+ */
+export async function toggleStation(stationId: string) {
+  try {
+    const station = HMILocator.getStation(stationId);
+    if (!station) {
+      return { success: false, error: `Station ${stationId} not found` };
+    }
+    
+    if (station.disabled) {
+      await station.enable();
+    } else {
+      await station.disable();
+    }
+    
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[Station Toggle Action] Failed for ${stationId}:`, error);
     return { success: false, error: message };
   }
 }
