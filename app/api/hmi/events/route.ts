@@ -230,6 +230,16 @@ export async function GET(request: NextRequest) {
 
         const stations = hmi.getAllStations();
         stations.forEach(onStationUpdated);
+
+        // Send existing unacknowledged alarms
+        if (AlarmLocator.isReady()) {
+          const alarmManager = AlarmLocator.getInstance();
+          const existingAlarms = alarmManager.getUnacknowledgedAlarms();
+          if (existingAlarms.length > 0) {
+            console.log(`[SSE] Sending ${existingAlarms.length} existing alarms to new client`);
+            existingAlarms.forEach(alarm => onAlarmAdded(alarm));
+          }
+        }
       } catch (err) {
         console.error("[SSE] Error sending initial data:", err);
       }
