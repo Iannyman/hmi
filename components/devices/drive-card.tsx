@@ -8,14 +8,23 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { DeviceDTO } from "@/types/device.dto";
 import { jogPositive, jogNegative, startHoming, startPositioning, setPositionIndex } from "@/actions/drive-actions";
+import { StationStatus } from "@/types/station.types";
+
 
 interface DriveCardProps {
   drive: Extract<DeviceDTO, { type: "drive" }>;
+  stationStatus?: StationStatus;
   onClick?: () => void;
 }
 
-export function DriveCard({ drive, onClick }: DriveCardProps) {
+export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
   const hasError = !!drive.errorMessage;
+
+    // Refactor station name
+  const stationName = drive.stationId.replace(/_/g, ' ');
+
+  // Disable cylinder controls when station is in automatic mode
+  const isStationAuto = stationStatus === "auto" ;  
 
   // Local state for position index input with debouncing 
   const [positionIndexValue, setPositionIndexValue] = useState(drive.targetPositionIndex ?? 0);
@@ -74,9 +83,6 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
     const result = await jogNegative(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start jog negative:", result.error);
   };    
-
-  // Refactor station name
-  const stationName = drive.stationId.replace(/_/g, ' ');
 
   return (
     <BaseDeviceCard
@@ -166,7 +172,7 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         <Button
           size="default"
           variant="outline"
-          disabled={false}
+          disabled={isStationAuto}
           onMouseDown={() => handleStartHoming(true)}
           onMouseUp={() => handleStartHoming(false)}
           onMouseLeave={() => handleStartHoming(false)}
@@ -183,7 +189,7 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         <Button
           size="default"
           variant="outline"
-          disabled={!drive.enPositioning}
+          disabled={!drive.enPositioning || isStationAuto}
           onMouseDown={() => handleStartPositioning(true)}
           onMouseUp={() => handleStartPositioning(false)}
           onMouseLeave={() => handleStartPositioning(false)}
@@ -200,7 +206,7 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         <Button
           size="default"
           variant="outline"
-          disabled={!drive.enForward}
+          disabled={!drive.enForward || isStationAuto}
           onMouseDown={() => handleJogPositive(true)}
           onMouseUp={() => handleJogPositive(false)}
           onMouseLeave={() => handleJogPositive(false)}
@@ -217,7 +223,7 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         <Button
           size="default"
           variant="outline"
-          disabled={!drive.enBackward}
+          disabled={!drive.enBackward || isStationAuto}
           onMouseDown={() => handleJogNegative(true)}
           onMouseUp={() => handleJogNegative(false)}
           onMouseLeave={() => handleJogNegative(false)}
