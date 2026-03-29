@@ -104,7 +104,7 @@ export class Motor extends Device {
     this.power = results[5].value as number;
     this.temperature = results[6].value as number;
     this.load = results[7].value as number;
-    this.errorMessage = results[8].value as string;
+    this.errorMessage = (results[8].value as string) ?? "";
 
     this.updateStatus();
   }

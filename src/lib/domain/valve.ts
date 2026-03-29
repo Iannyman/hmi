@@ -95,7 +95,7 @@ export class Valve extends Device {
     this.pressure = results[3].value as number;
     this.flowRate = results[4].value as number;
     this.actuatorStatus = results[5].value as ActuatorStatus;
-    this.errorMessage = results[6].value as string;
+    this.errorMessage = (results[6].value as string) ?? "";
 
     this.updateStatus();
   }

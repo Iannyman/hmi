@@ -99,7 +99,7 @@ export class Sensor extends Device {
     this.max = results[4].value as number;
     this.avg = results[5].value as number;
     this.alarmThreshold = results[6].value as number;
-    this.errorMessage = results[7].value as string;
+    this.errorMessage = (results[7].value as string) ?? "";
 
     this.updateStatus();
   }

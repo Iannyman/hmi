@@ -141,7 +141,7 @@ export class Cylinder extends Device {
     this.enabled = results[3].value as boolean;
     this.enableHomePosition = results[4].value as boolean;
     this.enableWorkPosition = results[5].value as boolean;
-    this.errorMessage = results[6].value as string;
+    this.errorMessage = results[6].value as string ?? "";
     this.toHomePosition = results[7].value as boolean;
     this.toWorkPosition = results[8].value as boolean;
     this.timeout = results[9].value as number;

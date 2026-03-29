@@ -100,7 +100,7 @@ export class Conveyor extends Device {
     this.capacity = results[4].value as number;
     this.loadPercentage = results[5].value as number;
     this.length = results[6].value as number;
-    this.errorMessage = results[7].value as string;
+    this.errorMessage = (results[7].value as string) ?? "";
 
     this.updateStatus();
   }

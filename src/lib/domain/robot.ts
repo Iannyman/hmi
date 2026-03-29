@@ -115,7 +115,7 @@ export class Robot extends Device {
       y: results[8].value as number,
       z: results[9].value as number,
     };
-    this.errorMessage = results[10].value as string;
+    this.errorMessage = (results[10].value as string) ?? "";
 
     this.updateStatus();
   }

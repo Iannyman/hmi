@@ -115,7 +115,7 @@ export class Drive extends Device {
     this.actPosition = results[1].value as number;
     this.actPositionIndex = results[2].value as number;
     this.axisMoving = results[3].value as boolean;
-    this.errorMessage = results[4].value as string;
+    this.errorMessage = results[4].value as string ?? "";
     this.enForward = results[5].value as boolean;
     this.enBackward = results[6].value as boolean;
     this.enPositioning = results[7].value as boolean;
