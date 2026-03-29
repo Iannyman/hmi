@@ -12,7 +12,6 @@ import { MonitoredDataValue } from "@/types/opcua.types";
 import { Device } from "./device";
 import { Cylinder } from "./cylinder";
 import { Motor } from "./motor";
-import { Valve } from "./valve";
 import { Sensor } from "./sensor";
 import { Robot } from "./robot";
 import { Conveyor } from "./conveyor";
@@ -372,14 +371,6 @@ export class Station extends EventEmitter implements DomainObject {
   }
 
   /**
-   * Get a typed Valve by ID
-   */
-  getValve(id: string): Valve | undefined {
-    const device = this.devices.get(id);
-    return device && device.type === "valve" ? device as Valve : undefined;
-  }
-
-  /**
    * Get a typed Sensor by ID
    */
   getSensor(id: string): Sensor | undefined {
@@ -423,9 +414,6 @@ export class Station extends EventEmitter implements DomainObject {
         break;
       case "motor":
         device = new Motor(deviceId, this.id, this.nodeMapper, this.opcuaService);
-        break;
-      case "valve":
-        device = new Valve(deviceId, this.id, this.nodeMapper, this.opcuaService);
         break;
       case "sensor":
         device = new Sensor(deviceId, this.id, this.nodeMapper, this.opcuaService);

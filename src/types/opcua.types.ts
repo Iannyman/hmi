@@ -162,7 +162,6 @@ export interface OPCUAMockData {
   stationDevices: Record<string, string[]>;
   devices: {
     motors: OPCUADevice[];
-    valves: OPCUADevice[];
     sensors: OPCUADevice[];
     robots: OPCUADevice[];
     conveyors: OPCUADevice[];

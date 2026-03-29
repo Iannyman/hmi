@@ -264,7 +264,6 @@ export class HMIManager extends EventEmitter {
     
     if (deviceIdLower.includes("cylinder")) return "cylinder";
     if (deviceIdLower.includes("motor")) return "motor";
-    if (deviceIdLower.includes("valve")) return "valve";
     if (deviceIdLower.includes("sensor")) return "sensor";
     if (deviceIdLower.includes("robot")) return "robot";
     if (deviceIdLower.includes("conveyor")) return "conveyor";

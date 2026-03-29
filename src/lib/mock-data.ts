@@ -1,4 +1,4 @@
-import { Device, Motor, Valve, Sensor, Robot, Conveyor, Drive, Cylinder, TrendData } from "@/types/device.types";
+import { Device, Motor, Sensor, Robot, Conveyor, Drive, Cylinder, TrendData } from "@/types/device.types";
 import { Station } from "@/types/station.types";
 
 // Combined Device mock data (BaseDevice + specific data)
@@ -58,41 +58,6 @@ export const mockMotors: Motor[] = [
       load: 0,
       runtime: "1h 45m",
       speedTrend: "down",
-    },
-  },
-];
-
-export const mockValves: Valve[] = [
-  {
-    id: "valve-1",
-    name: "Hydraulic Valve 01",
-    type: "valve",
-    status: "running",
-    location: "Station A2",
-    lastUpdate: new Date().toISOString(),
-    data: {
-      position: "open",
-      positionPercent: 85,
-      pressure: 120,
-      flowRate: 45,
-      actuatorStatus: "active",
-      lastCycle: "2h ago",
-    },
-  },
-  {
-    id: "valve-2",
-    name: "Hydraulic Valve 02",
-    type: "valve",
-    status: "stopped",
-    location: "Station A5",
-    lastUpdate: new Date().toISOString(),
-    data: {
-      position: "closed",
-      positionPercent: 0,
-      pressure: 0,
-      flowRate: 0,
-      actuatorStatus: "inactive",
-      lastCycle: "5h ago",
     },
   },
 ];
@@ -339,7 +304,6 @@ export const mockTrendData: TrendData[] = Array.from({ length: 60 }, (_, i) => (
 
 export const mockDevices = {
   motors: mockMotors,
-  valves: mockValves,
   sensors: mockSensors,
   robots: mockRobots,
   conveyors: mockConveyors,
@@ -350,7 +314,6 @@ export const mockDevices = {
 // All devices as a flat array
 export const allMockDevices: Device[] = [
   ...mockMotors,
-  ...mockValves,
   ...mockSensors,
   ...mockRobots,
   ...mockConveyors,
@@ -448,9 +411,9 @@ export const mockStations: Station[] = [
 
 export const stationDevices: Record<string, string[]> = {
   "station-a1": ["motor-1", "robot-1", "cylinder-1"],
-  "station-a2": ["valve-1", "sensor-1", "cylinder-2"],
+  "station-a2": ["sensor-1", "cylinder-2"],
   "station-a3": ["motor-2", "conveyor-1", "cylinder-3"],
   "station-a4": ["drive-1", "cylinder-4"],
-  "station-a5": ["sensor-2", "valve-2", "cylinder-5"],
+  "station-a5": ["sensor-2", "cylinder-5"],
   "station-a6": ["robot-2", "motor-3", "cylinder-6"],
 };

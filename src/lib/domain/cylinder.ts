@@ -104,17 +104,6 @@ export class Cylinder extends Device {
         timeout: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.iTimeout`),
       };
 
-      // Build reverse mapping for logging
-      this.nodeIdToName.set(this.nodeIds.details, "sDetails");
-      this.nodeIdToName.set(this.nodeIds.inWorkPosition, "xInWorkPosition");
-      this.nodeIdToName.set(this.nodeIds.inHomePosition, "xInHomePosition");
-      this.nodeIdToName.set(this.nodeIds.enabled, "xEnOperation");
-      this.nodeIdToName.set(this.nodeIds.enableHomePosition, "xEnHomepos");
-      this.nodeIdToName.set(this.nodeIds.enableWorkPosition, "xEnWorkpos");
-      this.nodeIdToName.set(this.nodeIds.errorMessage, "sErrorMessage");
-      this.nodeIdToName.set(this.nodeIds.toHomePosition, "xToHomePosition");
-      this.nodeIdToName.set(this.nodeIds.toWorkPosition, "xToWorkPosition");
-      this.nodeIdToName.set(this.nodeIds.timeout, "iTimeout");
     }
 
     return [
