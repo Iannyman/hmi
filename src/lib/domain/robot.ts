@@ -13,6 +13,7 @@ import { RobotMode, AxisPositions } from "@/types/domain.types";
 
 export class Robot extends Device {
   // Attributes (for display)
+  public name: string = "";
   public mode: RobotMode = "manual";
   public program: string = "";
   public programNumber: string = "";
@@ -20,9 +21,34 @@ export class Robot extends Device {
   public totalCycles: number = 0;
   public timeRemaining: string = "00:00:00";
   public axisPositions: AxisPositions = { x: 0, y: 0, z: 0 };
+  public errorMessage: string = "";
+
+  // Track previous error state for change detection
+  private previousErrorMessage: string = "";
+
+  /**
+   * Update robot status based on current state
+   * Called by HMIManager when errorMessage changes via global subscription.
+   */
+  public updateStatus(): void {
+    const oldError = this.previousErrorMessage;
+    this.previousErrorMessage = this.errorMessage;
+
+    if (this.errorMessage !== "") {
+      if (oldError !== this.errorMessage && this.listenerCount("error") > 0) {
+        this.emit("error", {
+          stationId: this.stationId,
+          deviceId: this.id,
+          deviceName: this.name || this.id,
+          errorMessage: this.errorMessage,
+        });
+      }
+    }
+  }
 
   // Node IDs (cached for performance)
   private nodeIds: {
+    name: string;
     mode: string;
     program: string;
     programNumber: string;
@@ -32,6 +58,7 @@ export class Robot extends Device {
     axisX: string;
     axisY: string;
     axisZ: string;
+    errorMessage: string;
   } | null = null;
 
   constructor(
@@ -46,6 +73,7 @@ export class Robot extends Device {
   protected getNodeIds(): string[] {
     if (!this.nodeIds) {
       this.nodeIds = {
+        name: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sName`),
         mode: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sMode`),
         program: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sProgram`),
         programNumber: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sProgramNumber`),
@@ -55,10 +83,12 @@ export class Robot extends Device {
         axisX: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dAxisX`),
         axisY: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dAxisY`),
         axisZ: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dAxisZ`),
+        errorMessage: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sErrorMessage`),
       };
     }
 
     return [
+      this.nodeIds.name,
       this.nodeIds.mode,
       this.nodeIds.program,
       this.nodeIds.programNumber,
@@ -68,21 +98,26 @@ export class Robot extends Device {
       this.nodeIds.axisX,
       this.nodeIds.axisY,
       this.nodeIds.axisZ,
+      this.nodeIds.errorMessage,
     ];
   }
 
   protected mapResultsToAttributes(results: Array<{ value: unknown }>): void {
-    this.mode = this.mapMode(results[0].value as number);
-    this.program = results[1].value as string;
-    this.programNumber = results[2].value as string;
-    this.cycle = results[3].value as number;
-    this.totalCycles = results[4].value as number;
-    this.timeRemaining = results[5].value as string;
+    this.name = results[0].value as string;
+    this.mode = this.mapMode(results[1].value as number);
+    this.program = results[2].value as string;
+    this.programNumber = results[3].value as string;
+    this.cycle = results[4].value as number;
+    this.totalCycles = results[5].value as number;
+    this.timeRemaining = results[6].value as string;
     this.axisPositions = {
-      x: results[6].value as number,
-      y: results[7].value as number,
-      z: results[8].value as number,
+      x: results[7].value as number,
+      y: results[8].value as number,
+      z: results[9].value as number,
     };
+    this.errorMessage = results[10].value as string;
+
+    this.updateStatus();
   }
 
   protected handleSubscriptionChanges(
@@ -94,7 +129,12 @@ export class Robot extends Device {
     const nodeId = dataValue.nodeId?.toString();
     const value = dataValue.value?.value;
 
+    let statusRelevantChanged = false;
+
     switch (nodeId) {
+      case this.nodeIds.name:
+        this.name = value as string;
+        break;
       case this.nodeIds.mode:
         this.mode = this.mapMode(value as number);
         break;
@@ -122,6 +162,14 @@ export class Robot extends Device {
       case this.nodeIds.axisZ:
         this.axisPositions.z = value as number;
         break;
+      case this.nodeIds.errorMessage:
+        this.errorMessage = value as string;
+        statusRelevantChanged = true;
+        break;
+    }
+
+    if (statusRelevantChanged) {
+      this.updateStatus();
     }
 
     this.emit("updated", this);
