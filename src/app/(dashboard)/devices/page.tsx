@@ -1,7 +1,6 @@
 "use client";
 
 import { MotorCard } from "@/components/devices/motor-card";
-import { ValveCard } from "@/components/devices/valve-card";
 import { RobotCard } from "@/components/devices/robot-card";
 import { SensorCard } from "@/components/devices/sensor-card";
 import { ConveyorCard } from "@/components/devices/conveyor-card";
@@ -60,7 +59,6 @@ function DevicesContent() {
   const deviceTypes: { value: FilterType; label: string }[] = [
     { value: "all", label: "All Devices" },
     { value: "motor", label: "Motors" },
-    { value: "valve", label: "Valves" },
     { value: "sensor", label: "Sensors" },
     { value: "robot", label: "Robots" },
     { value: "conveyor", label: "Conveyors" },
@@ -92,7 +90,7 @@ function DevicesContent() {
 
       for (const device of station.devices) {
         const deviceType = device.type as FilterType;
-        const VALID_DEVICE_TYPES: DeviceType[] = ["motor", "valve", "sensor", "robot", "conveyor", "drive", "cylinder"];
+        const VALID_DEVICE_TYPES: DeviceType[] = ["motor", "sensor", "robot", "conveyor", "drive", "cylinder"];
         if (!VALID_DEVICE_TYPES.includes(deviceType as DeviceType)) {
           continue;
         }
@@ -134,8 +132,6 @@ function DevicesContent() {
     switch (device.type) {
       case "motor":
         return <MotorCard key={device.uniqueKey} motor={device} />;
-      case "valve":
-        return <ValveCard key={device.uniqueKey} valve={device} />;
       case "sensor":
         return <SensorCard key={device.uniqueKey} sensor={device} />;
       case "robot":

@@ -18,7 +18,6 @@ interface BaseDeviceCardProps {
 
 const deviceIcons: Record<DeviceType, React.ElementType> = {
   motor: Settings,
-  valve: Wrench,
   sensor: Activity,
   robot: Bot,
   conveyor: ArrowRight,

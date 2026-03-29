@@ -2,7 +2,7 @@
 // Device Types
 // ============================================================================
 
-export type DeviceType = "motor" | "valve" | "sensor" | "robot" | "conveyor" | "drive" | "cylinder";
+export type DeviceType = "motor" | "sensor" | "robot" | "conveyor" | "drive" | "cylinder";
 
 /**
  * Device operational status (running/stopped states)
@@ -31,15 +31,6 @@ export interface MotorData {
   load: number;
   runtime: string;
   speedTrend?: "up" | "down" | "neutral";
-}
-
-export interface ValveData {
-  position: "open" | "closed" | "partial";
-  positionPercent: number;
-  pressure: number;
-  flowRate: number;
-  actuatorStatus: "active" | "inactive";
-  lastCycle: string;
 }
 
 export interface SensorData {
@@ -114,11 +105,6 @@ export interface Motor extends BaseDevice {
   data: MotorData;
 }
 
-export interface Valve extends BaseDevice {
-  type: "valve";
-  data: ValveData;
-}
-
 export interface Sensor extends BaseDevice {
   type: "sensor";
   data: SensorData;
@@ -144,4 +130,4 @@ export interface Cylinder extends BaseDevice {
   data: CylinderData;
 }
 
-export type Device = Motor | Valve | Sensor | Robot | Conveyor | Drive | Cylinder;
+export type Device = Motor | Sensor | Robot | Conveyor | Drive | Cylinder;

@@ -76,8 +76,6 @@ export interface DomainObject {
 // ============================================================================
 
 export type CylinderModelType = "2-state" | "3-state";
-export type ValvePosition = "open" | "closed" | "partial";
-export type ActuatorStatus = "active" | "inactive";
 export type RobotMode = "auto" | "manual";
 export type ConveyorDirection = "forward" | "reverse" | "stopped";
 

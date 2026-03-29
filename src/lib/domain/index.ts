@@ -11,7 +11,6 @@ export { Station } from "./station";
 export { Device } from "./device";
 export { Cylinder } from "./cylinder";
 export { Motor } from "./motor";
-export { Valve } from "./valve";
 export { Sensor } from "./sensor";
 export { Robot } from "./robot";
 export { Conveyor } from "./conveyor";

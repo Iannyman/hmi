@@ -7,13 +7,12 @@
  */
 
 import { DeviceStatus } from "./device.types";
-import { MotorData, ValveData, SensorData, RobotData, ConveyorData, DriveData, CylinderData } from "./device.types";
+import { MotorData, SensorData, RobotData, ConveyorData, DriveData, CylinderData } from "./device.types";
 
 // Discriminated union - each device type follows the same pattern
 // DeviceBase properties (id, stationId, name, type, status, details) are implicitly included via intersection
 export type DeviceDTO =
   | ({ id: string; stationId: string; name: string; type: "motor"; status: DeviceStatus; details: string } & MotorData)
-  | ({ id: string; stationId: string; name: string; type: "valve"; status: DeviceStatus; details: string } & ValveData)
   | ({ id: string; stationId: string; name: string; type: "sensor"; status: DeviceStatus; details: string } & SensorData)
   | ({ id: string; stationId: string; name: string; type: "robot"; status: DeviceStatus; details: string } & RobotData)
   | ({ id: string; stationId: string; name: string; type: "conveyor"; status: DeviceStatus; details: string } & ConveyorData)

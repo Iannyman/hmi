@@ -12,7 +12,6 @@ import { NextRequest } from "next/server";
 import { HMILocator, AlarmLocator } from "@/lib/server";
 import { Cylinder } from "@/lib/domain/cylinder";
 import { Motor } from "@/lib/domain/motor";
-import { Valve } from "@/lib/domain/valve";
 import { Sensor } from "@/lib/domain/sensor";
 import { Robot } from "@/lib/domain/robot";
 import { Conveyor } from "@/lib/domain/conveyor";
@@ -66,17 +65,6 @@ function serializeDevice(device: Device, stationId: string) {
       power: device.power,
       temperature: device.temperature,
       load: device.load,
-    };
-  }
-
-  if (device instanceof Valve) {
-    return {
-      ...baseData,
-      position: device.position,
-      positionPercent: device.positionPercent,
-      pressure: device.pressure,
-      flowRate: device.flowRate,
-      actuatorStatus: device.actuatorStatus,
     };
   }
 

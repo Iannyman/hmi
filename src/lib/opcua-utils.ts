@@ -157,7 +157,7 @@ import { DeviceType } from "@/types/device.types";
  * @returns Device type or null
  */
 export function getDeviceTypeFromDisplayName(displayName: string): DeviceType | null {
-  const deviceTypes: DeviceType[] = ["motor", "valve", "sensor", "robot", "conveyor", "drive", "cylinder"];
+  const deviceTypes: DeviceType[] = ["motor", "sensor", "robot", "conveyor", "drive", "cylinder"];
   const lowerName = displayName.toLowerCase();
   
   for (const type of deviceTypes) {
@@ -222,7 +222,7 @@ export function extractDeviceId(displayName: string): string | null {
  * @returns True if is a device
  */
 export function isDevice(displayName: string): boolean {
-  const deviceTypes = ["motor", "valve", "sensor", "robot", "conveyor", "drive", "cylinder"];
+  const deviceTypes = ["motor", "sensor", "robot", "conveyor", "drive", "cylinder"];
   const lowerName = displayName.toLowerCase();
   return deviceTypes.some(type => lowerName.startsWith(type));
 }

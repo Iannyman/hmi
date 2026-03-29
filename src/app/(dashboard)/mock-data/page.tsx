@@ -1,7 +1,6 @@
 "use client";
 
 import { MotorCard } from "@/components/devices/motor-card";
-import { ValveCard } from "@/components/devices/valve-card";
 import { RobotCard } from "@/components/devices/robot-card";
 import { SensorCard } from "@/components/devices/sensor-card";
 import { ConveyorCard } from "@/components/devices/conveyor-card";
@@ -15,7 +14,7 @@ import { mockDevices } from "@/lib/mock-data";
 import { DeviceStatus } from "@/types/device.types";
 import { DeviceDTO } from "@/types/device.dto";
 
-type FilterType = "all" | "motor" | "valve" | "sensor" | "robot" | "conveyor" | "drive" | "cylinder";
+type FilterType = "all" | "motor" | "sensor" | "robot" | "conveyor" | "drive" | "cylinder";
 type FilterStatus = "all" | DeviceStatus;
 
 // Simplified type for mock devices - extends DeviceDTO with location
@@ -28,7 +27,6 @@ export default function MockDataPage() {
   const deviceTypes: { value: FilterType; label: string }[] = [
     { value: "all", label: "All Devices" },
     { value: "motor", label: "Motors" },
-    { value: "valve", label: "Valves" },
     { value: "sensor", label: "Sensors" },
     { value: "robot", label: "Robots" },
     { value: "conveyor", label: "Conveyors" },
@@ -59,19 +57,6 @@ export default function MockDataPage() {
         status: d.status,
         details: d.name,
         location: d.location || `Station A${i + 1}`,
-        ...d.data,
-      } as MockDevice);
-    });
-
-    mockDevices.valves.forEach((d, i) => {
-      devices.push({
-        id: d.id,
-        stationId: `Station_B${i + 1}`,
-        name: d.name,
-        type: "valve",
-        status: d.status,
-        details: d.name,
-        location: d.location || `Station B${i + 1}`,
         ...d.data,
       } as MockDevice);
     });
@@ -155,8 +140,6 @@ export default function MockDataPage() {
     switch (device.type) {
       case "motor":
         return <MotorCard key={device.id} motor={device} />;
-      case "valve":
-        return <ValveCard key={device.id} valve={device} />;
       case "sensor":
         return <SensorCard key={device.id} sensor={device} />;
       case "robot":

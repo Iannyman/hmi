@@ -1,7 +1,7 @@
 /**
  * Base Device Class
  * 
- * Abstract base class for all device types (Cylinder, Motor, Valve, etc.).
+ * Abstract base class for all device types (Cylinder, Motor, Sensor, etc.).
  * Provides common functionality for all devices including subscription, write, and refresh.
  */
 
