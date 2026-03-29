@@ -12,6 +12,7 @@ import { MonitoredDataValue } from "@/types/opcua.types";
 
 export class Motor extends Device {
   // Attributes (for display)
+  public name: string = "";
   public speed: number = 0;
   public maxSpeed: number = 0;
   public current: number = 0;
@@ -19,9 +20,34 @@ export class Motor extends Device {
   public power: number = 0;
   public temperature: number = 0;
   public load: number = 0;
+  public errorMessage: string = "";
+
+  // Track previous error state for change detection
+  private previousErrorMessage: string = "";
+
+  /**
+   * Update motor status based on current state
+   * Called by HMIManager when errorMessage changes via global subscription.
+   */
+  public updateStatus(): void {
+    const oldError = this.previousErrorMessage;
+    this.previousErrorMessage = this.errorMessage;
+
+    if (this.errorMessage !== "") {
+      if (oldError !== this.errorMessage && this.listenerCount("error") > 0) {
+        this.emit("error", {
+          stationId: this.stationId,
+          deviceId: this.id,
+          deviceName: this.name || this.id,
+          errorMessage: this.errorMessage,
+        });
+      }
+    }
+  }
 
   // Node IDs (cached for performance)
   private nodeIds: {
+    name: string;
     speed: string;
     maxSpeed: string;
     current: string;
@@ -29,6 +55,7 @@ export class Motor extends Device {
     power: string;
     temperature: string;
     load: string;
+    errorMessage: string;
   } | null = null;
 
   constructor(
@@ -43,6 +70,7 @@ export class Motor extends Device {
   protected getNodeIds(): string[] {
     if (!this.nodeIds) {
       this.nodeIds = {
+        name: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sName`),
         speed: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dSpeed`),
         maxSpeed: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dMaxSpeed`),
         current: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dCurrent`),
@@ -50,10 +78,12 @@ export class Motor extends Device {
         power: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dPower`),
         temperature: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dTemperature`),
         load: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dLoad`),
+        errorMessage: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sErrorMessage`),
       };
     }
 
     return [
+      this.nodeIds.name,
       this.nodeIds.speed,
       this.nodeIds.maxSpeed,
       this.nodeIds.current,
@@ -61,17 +91,22 @@ export class Motor extends Device {
       this.nodeIds.power,
       this.nodeIds.temperature,
       this.nodeIds.load,
+      this.nodeIds.errorMessage,
     ];
   }
 
   protected mapResultsToAttributes(results: Array<{ value: unknown }>): void {
-    this.speed = results[0].value as number;
-    this.maxSpeed = results[1].value as number;
-    this.current = results[2].value as number;
-    this.maxCurrent = results[3].value as number;
-    this.power = results[4].value as number;
-    this.temperature = results[5].value as number;
-    this.load = results[6].value as number;
+    this.name = results[0].value as string;
+    this.speed = results[1].value as number;
+    this.maxSpeed = results[2].value as number;
+    this.current = results[3].value as number;
+    this.maxCurrent = results[4].value as number;
+    this.power = results[5].value as number;
+    this.temperature = results[6].value as number;
+    this.load = results[7].value as number;
+    this.errorMessage = (results[8].value as string) ?? "";
+
+    this.updateStatus();
   }
 
   protected handleSubscriptionChanges(
@@ -83,7 +118,12 @@ export class Motor extends Device {
     const nodeId = dataValue.nodeId?.toString();
     const value = dataValue.value?.value;
 
+    let statusRelevantChanged = false;
+
     switch (nodeId) {
+      case this.nodeIds.name:
+        this.name = value as string;
+        break;
       case this.nodeIds.speed:
         this.speed = value as number;
         break;
@@ -105,6 +145,14 @@ export class Motor extends Device {
       case this.nodeIds.load:
         this.load = value as number;
         break;
+      case this.nodeIds.errorMessage:
+        this.errorMessage = value as string;
+        statusRelevantChanged = true;
+        break;
+    }
+
+    if (statusRelevantChanged) {
+      this.updateStatus();
     }
 
     this.emit("updated", this);

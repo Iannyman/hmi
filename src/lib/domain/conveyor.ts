@@ -13,21 +13,48 @@ import { ConveyorDirection } from "@/types/domain.types";
 
 export class Conveyor extends Device {
   // Attributes (for display)
+  public name: string = "";
   public speed: number = 0;
   public direction: ConveyorDirection = "stopped";
   public materialCount: number = 0;
   public capacity: number = 0;
   public loadPercentage: number = 0;
   public length: number = 0;
+  public errorMessage: string = "";
+
+  // Track previous error state for change detection
+  private previousErrorMessage: string = "";
+
+  /**
+   * Update conveyor status based on current state
+   * Called by HMIManager when errorMessage changes via global subscription.
+   */
+  public updateStatus(): void {
+    const oldError = this.previousErrorMessage;
+    this.previousErrorMessage = this.errorMessage;
+
+    if (this.errorMessage !== "") {
+      if (oldError !== this.errorMessage && this.listenerCount("error") > 0) {
+        this.emit("error", {
+          stationId: this.stationId,
+          deviceId: this.id,
+          deviceName: this.name || this.id,
+          errorMessage: this.errorMessage,
+        });
+      }
+    }
+  }
 
   // Node IDs (cached for performance)
   private nodeIds: {
+    name: string;
     speed: string;
     direction: string;
     materialCount: string;
     capacity: string;
     loadPercentage: string;
     length: string;
+    errorMessage: string;
   } | null = null;
 
   constructor(
@@ -42,32 +69,40 @@ export class Conveyor extends Device {
   protected getNodeIds(): string[] {
     if (!this.nodeIds) {
       this.nodeIds = {
+        name: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sName`),
         speed: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dSpeed`),
         direction: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sDirection`),
         materialCount: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dMaterialCount`),
         capacity: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dCapacity`),
         loadPercentage: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dLoadPercentage`),
         length: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.dLength`),
+        errorMessage: this.nodeMapper.getNodeId(`${this.stationId}.${this.id}.sErrorMessage`),
       };
     }
 
     return [
+      this.nodeIds.name,
       this.nodeIds.speed,
       this.nodeIds.direction,
       this.nodeIds.materialCount,
       this.nodeIds.capacity,
       this.nodeIds.loadPercentage,
       this.nodeIds.length,
+      this.nodeIds.errorMessage,
     ];
   }
 
   protected mapResultsToAttributes(results: Array<{ value: unknown }>): void {
-    this.speed = results[0].value as number;
-    this.direction = this.mapDirection(results[1].value as number);
-    this.materialCount = results[2].value as number;
-    this.capacity = results[3].value as number;
-    this.loadPercentage = results[4].value as number;
-    this.length = results[5].value as number;
+    this.name = results[0].value as string;
+    this.speed = results[1].value as number;
+    this.direction = this.mapDirection(results[2].value as number);
+    this.materialCount = results[3].value as number;
+    this.capacity = results[4].value as number;
+    this.loadPercentage = results[5].value as number;
+    this.length = results[6].value as number;
+    this.errorMessage = (results[7].value as string) ?? "";
+
+    this.updateStatus();
   }
 
   protected handleSubscriptionChanges(
@@ -78,7 +113,12 @@ export class Conveyor extends Device {
 
     const value = dataValue.value?.value;
 
+    let statusRelevantChanged = false;
+
     switch (dataValue.nodeId?.toString()) {
+      case this.nodeIds.name:
+        this.name = value as string;
+        break;
       case this.nodeIds.speed:
         this.speed = value as number;
         break;
@@ -97,6 +137,14 @@ export class Conveyor extends Device {
       case this.nodeIds.length:
         this.length = value as number;
         break;
+      case this.nodeIds.errorMessage:
+        this.errorMessage = value as string;
+        statusRelevantChanged = true;
+        break;
+    }
+
+    if (statusRelevantChanged) {
+      this.updateStatus();
     }
 
     this.emit("updated", this);

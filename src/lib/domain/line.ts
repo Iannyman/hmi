@@ -145,7 +145,7 @@ export class Line extends EventEmitter implements DomainObject {
     this.partsNOK = results[2].value as number;
     this.status = this.mapStatus(results[3].value as string);
     this.mode = this.mapMode(results[4].value as number);
-    this.errorMessage = results[5].value as string;
+    this.errorMessage = results[5].value as string ?? "";
 
     // Initialize previousErrorMessage for change detection
     this.previousErrorMessage = this.errorMessage;

@@ -11,8 +11,8 @@ import { OPCUAService } from "./opcua-service";
 import { Line } from "../domain/line";
 import { Station } from "../domain/station";
 import { Device } from "../domain/device";
-import { Cylinder } from "../domain/cylinder";
 import { StructureChange } from "@/types/domain.types";
+import { DeviceType } from "@/types/device.types";
 import { BrowseTreeNode, MonitoredDataValue } from "@/types/opcua.types";
 
 export class HMIManager extends EventEmitter {
@@ -259,7 +259,7 @@ export class HMIManager extends EventEmitter {
   /**
    * Get device type from device ID
    */
-  private getDeviceType(deviceId: string): "cylinder" | "motor" | "valve" | "sensor" | "robot" | "conveyor" | "drive" {
+  private getDeviceType(deviceId: string): DeviceType {
     const deviceIdLower = deviceId.toLowerCase();
     
     if (deviceIdLower.includes("cylinder")) return "cylinder";
@@ -369,26 +369,24 @@ export class HMIManager extends EventEmitter {
   /**
    * Subscribe to device error messages globally
    * This ensures alarm detection works regardless of current route
-   * Subscribes only to xErrorMessage nodes for cylinders (lightweight)
+   * Subscribes to sErrorMessage nodes for all devices (lightweight)
    */
   private async subscribeToDeviceErrorMessages(): Promise<void> {
     const errorNodeIds: string[] = [];
     const errorNodeToDeviceMap: Map<string, { stationId: string; device: Device }> = new Map();
 
-    // Collect all error message node IDs from cylinders
+    // Collect all error message node IDs from all devices
     for (const station of this.stations.values()) {
       const devices = station.getDevices();
       for (const device of devices) {
-        if (device.type === "cylinder") {
-          const errorNodeId = this.nodeMapper.getNodeId(`${station.id}.${device.id}.sErrorMessage`);
-          errorNodeIds.push(errorNodeId);
-          errorNodeToDeviceMap.set(errorNodeId, { stationId: station.id, device });
-        }
+        const errorNodeId = this.nodeMapper.getNodeId(`${station.id}.${device.id}.sErrorMessage`);
+        errorNodeIds.push(errorNodeId);
+        errorNodeToDeviceMap.set(errorNodeId, { stationId: station.id, device });
       }
     }
 
     if (errorNodeIds.length === 0) {
-      console.log("[HMI Manager] No cylinder devices found for error monitoring");
+      console.log("[HMI Manager] No devices found for error monitoring");
       return;
     }
 
@@ -401,15 +399,12 @@ export class HMIManager extends EventEmitter {
         const mapped = errorNodeToDeviceMap.get(dataValue.nodeId?.toString());
         if (mapped) {
           const { device } = mapped;
-          // Only cylinders and drives have errorMessage and updateStatus
-          const deviceWithError = device as Cylinder;
+          // All device types have errorMessage and updateStatus()
+          const deviceWithError = device as Device & { errorMessage: string; updateStatus: () => void };
           // Update the device's errorMessage directly
           deviceWithError.errorMessage = value as string || "";
 
-          // Trigger error handling by calling updateStatus if available
-          if (typeof deviceWithError.updateStatus === "function") {
-            deviceWithError.updateStatus();
-          }
+          deviceWithError.updateStatus();
         }
       }
     );
