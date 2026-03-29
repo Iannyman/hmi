@@ -1,11 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlayCircle, PauseCircle, Play, Pause, Loader2, RotateCcw } from "lucide-react";
+import { Play, Pause, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useHMIManager } from "@/components/providers";
-import { LineStatus } from "@/types/domain.types";
 import { setLineMode } from "@/app/(dashboard)/_actions/line-actions";
 
 interface LineControlPanelProps {
@@ -16,11 +15,8 @@ interface LineControlPanelProps {
 const MIN_LOADING_DURATION = 600;
 
 export function LineControlPanel({ className }: LineControlPanelProps) {
-  const { line, isInitialized } = useHMIManager();
+  const { isInitialized } = useHMIManager();
   const [loadingAction, setLoadingAction] = useState<"start" | "stop" | "init" | null>(null);
-
-  // Get line status - use real data or default to stopped
-  const lineStatus: LineStatus = line?.status as LineStatus ?? "stopped";
 
   const handleAction = async (action: "start" | "stop" | "init", mode: "auto" | "setup" | "init") => {
     setLoadingAction(action);
@@ -44,61 +40,6 @@ export function LineControlPanel({ className }: LineControlPanelProps) {
   const handleStart = () => handleAction("start", "auto");
   const handleStop = () => handleAction("stop", "setup");
   const handleInit = () => handleAction("init", "init");
-
-  const getStatusConfig = () => {
-    switch (lineStatus) {
-      case "auto":
-        return {
-          text: "Auto",
-          color: "text-[hsl(var(--status-running))]",
-          bgColor: "bg-[hsl(var(--status-running))]/10",
-          borderColor: "border-[hsl(var(--status-running))]/30",
-          icon: PlayCircle,
-        };
-      case "home":
-        return {
-          text: "Home",
-          color: "text-[hsl(var(--status-running))]",
-          bgColor: "bg-[hsl(var(--status-running))]/10",
-          borderColor: "border-[hsl(var(--status-running))]/30",
-          icon: PlayCircle,
-        };        
-      case "setup":
-        return {
-          text: "Setup",
-          color: "text-[hsl(var(--text-muted))]",
-          bgColor: "bg-[hsl(var(--surface))]",
-          borderColor: "border-[hsl(var(--border))]",
-          icon: PauseCircle,
-        };
-      case "end":
-        return {
-          text: "End cycle",
-          color: "text-[hsl(var(--text-muted))]",
-          bgColor: "bg-[hsl(var(--surface))]",
-          borderColor: "border-[hsl(var(--border))]",
-          icon: PauseCircle,
-        };        
-      case "error":
-        return {
-          text: "Fault",
-          color: "text-[hsl(var(--status-fault))]",
-          bgColor: "bg-[hsl(var(--status-fault))]/10",
-          borderColor: "border-[hsl(var(--status-fault))]/30",
-          icon: PauseCircle,
-        };
-      default:
-        return {
-          text: "Unknown",
-          color: "text-[hsl(var(--text-muted))]",
-          bgColor: "bg-[hsl(var(--surface))]",
-          borderColor: "border-[hsl(var(--border))]",
-          icon: PauseCircle,
-        };
-    }
-  };
-
-  getStatusConfig();
 
   return (
     <div className={cn("card p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4", className)}>

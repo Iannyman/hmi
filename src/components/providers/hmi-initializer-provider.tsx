@@ -17,6 +17,7 @@ import { useEffect, useState, useRef } from "react";
 import { useOPCUA } from "./opcua-hook";
 import { useHMIManager } from "./hmi-manager-hook";
 import { useConnectionSetter } from "./connection-provider";
+import { HMISSEProvider } from "./hmi-sse-provider";
 
 interface HMIInitializerProviderProps {
   children: React.ReactNode;
@@ -309,6 +310,6 @@ export function HMIInitializerProvider({ children }: HMIInitializerProviderProps
     autoBrowseAndInitialize();
   }, [isConnected, hmiInitialized, hmiInitializing, browse, initializeHMI]);
 
-  // Just render children - this provider handles initialization in background
-  return <>{children}</>;
+  // Render children wrapped in SSE provider — SSE only activates after init
+  return <HMISSEProvider>{children}</HMISSEProvider>;
 }

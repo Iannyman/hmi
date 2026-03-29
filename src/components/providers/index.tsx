@@ -5,26 +5,26 @@ import { ThemeProvider } from "./theme-provider";
 import { ConnectionProvider } from "./connection-provider";
 import { OPCUADataProvider } from "./opcua-data-provider";
 import { HMIDataProvider } from "./hmi-data-provider";
-import { HMISSEProvider } from "./hmi-sse-provider";
 import { HMIInitializerProvider } from "./hmi-initializer-provider";
 import { SidebarProvider } from "./sidebar-provider";
 import { LineStatusProvider } from "./line-status-provider";
 import { LineStatisticsProvider } from "./line-statistics-provider";
+import { AlarmNotificationWrapper } from "@/components/notifications/alarm-notification-wrapper";
 
 /**
  * Composed Provider Hierarchy
  *
  * Order matters — each provider depends on its parent's context:
  *
- * ThemeProvider              (theme: dark/light)
- * └── ConnectionProvider     (OPC UA connection state)
- *     └── OPCUADataProvider  (OPC UA connection data)
+ * ThemeProvider                (theme: dark/light)
+ * └── ConnectionProvider       (OPC UA connection state)
+ *     └── OPCUADataProvider    (OPC UA connection data)
  *         └── HMIDataProvider  (HMI data context)
- *             └── HMISSEProvider  (Server-Sent Events for real-time updates)
- *                 └── HMIInitializerProvider  (auto-connect + init lifecycle)
- *                     └── SidebarProvider     (UI sidebar state)
- *                         └── LineStatusProvider     (production line status)
- *                             └── LineStatisticsProvider  (production stats)
+ *             └── HMIInitializerProvider  (auto-connect + init lifecycle)
+ *                 └── SidebarProvider     (UI sidebar state)
+ *                     └── LineStatusProvider     (production line status)
+ *                         └── LineStatisticsProvider  (production stats)
+ *                             └── AlarmNotificationWrapper  (alarm toasts)
  */
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -32,17 +32,17 @@ export function Providers({ children }: { children: ReactNode }) {
       <ConnectionProvider>
         <OPCUADataProvider>
           <HMIDataProvider>
-            <HMISSEProvider>
-              <HMIInitializerProvider>
-                <SidebarProvider>
-                  <LineStatusProvider>
-                    <LineStatisticsProvider>
+            <HMIInitializerProvider>
+              <SidebarProvider>
+                <LineStatusProvider>
+                  <LineStatisticsProvider>
+                    <AlarmNotificationWrapper>
                       {children}
-                    </LineStatisticsProvider>
-                  </LineStatusProvider>
-                </SidebarProvider>
-              </HMIInitializerProvider>
-            </HMISSEProvider>
+                    </AlarmNotificationWrapper>
+                  </LineStatisticsProvider>
+                </LineStatusProvider>
+              </SidebarProvider>
+            </HMIInitializerProvider>
           </HMIDataProvider>
         </OPCUADataProvider>
       </ConnectionProvider>

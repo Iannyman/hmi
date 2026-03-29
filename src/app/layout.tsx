@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { AlarmNotificationWrapper } from "@/components/notifications";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
@@ -15,7 +14,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -39,9 +37,7 @@ export default function RootLayout({
           }}
         />
         <Providers>
-          <AlarmNotificationWrapper>
-            {children}
-          </AlarmNotificationWrapper>
+          {children}
         </Providers>
       </body>
     </html>
