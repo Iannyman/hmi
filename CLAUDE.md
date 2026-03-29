@@ -2,320 +2,192 @@
 
 ## Project Overview
 
-Industrial Human-Machine Interface (HMI) web application for monitoring and controlling PLC-driven manufacturing systems. The system uses a **PLC-driven architecture** where the UI is dynamically generated from the OPC UA server structure.
-
-**Core Innovation**: The single point of change is the **PLC itself**. The HMI discovers structure dynamically from the OPC UA server and generates UI components automatically. Add/remove stations or devices without code changes.
+Industrial Human-Machine Interface (HMI) for monitoring and controlling PLC-driven manufacturing systems via OPC UA. The UI is dynamically generated from the OPC UA server structure — the PLC is the single point of change. Add/remove stations or devices without code changes.
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 with App Router
-- **UI**: React 19, TypeScript
-- **Styling**: Tailwind CSS with custom design system
-- **Components**: shadcn/ui (Radix UI primitives)
-- **Industrial Communication**: node-opcua for OPC UA connectivity
-- **Charts**: Recharts for trend visualization
-- **Icons**: Lucide React
+- **Next.js** 16.1.3 (App Router, Turbopack)
+- **React** 19.2.3 / **TypeScript** 5.9.3 (strict mode)
+- **Tailwind CSS** 3.4.17 with custom design system (dark-first)
+- **shadcn/ui** (Radix UI primitives, default style, slate base)
+- **node-opcua** 2.163.1 (OPC UA client for PLC communication)
+- **Recharts** 2.15.0 (trend charts)
+- **Lucide React** 0.468.0 (icons)
 
-## Architecture: Event-Driven Domain Model
+## Commands
 
-### Core Principles
-
-1. **Discovery-First**: System discovers PLC structure before rendering UI
-2. **Event-Driven Updates**: All data changes flow through event emitters
-3. **Domain-Driven Design**: Rich domain models encapsulate business logic
-4. **Single Source of Truth**: The PLC/OPC UA server drives UI generation
-
-### Complete File Structure
-
-```
-app/
-├── (dashboard)/             # Dashboard layout group
-│   ├── dashboard/          # Main production overview
-│   ├── devices/            # Device monitoring page
-│   ├── alarms/             # Alarm management
-│   ├── trends/             # Historical trends
-│   ├── settings/           # System configuration
-│   ├── opcua-demo/         # OPC UA browser/testing
-│   └── layout.tsx          # Dashboard layout wrapper
-├── api/                    # API routes
-│   ├── opcua/              # OPC UA operations
-│   │   ├── connect/        # Connect/disconnect from server
-│   │   ├── read/           # Read single/multiple node values
-│   │   ├── write/          # Write values to nodes
-│   │   ├── subscribe/      # Create/manage subscriptions
-│   │   └── browse/         # Browse OPC UA address space
-│   └── hmi/                # HMI-specific APIs
-│       ├── initialize/     # Initialize HMI system
-│       ├── read/           # Read HMI data
-│       └── reset/          # Reset HMI state
-├── layout.tsx              # Root layout with providers
-└── page.tsx                # Landing page
-
-components/
-├── devices/                # Device-specific cards
-│   ├── base-device-card.tsx    # Shared base component for all devices
-│   ├── motor-card.tsx          # Motor monitoring (speed, current, temp)
-│   ├── valve-card.tsx          # Valve control (position, pressure, flow)
-│   ├── sensor-card.tsx         # Sensor displays (value, thresholds)
-│   ├── robot-card.tsx          # Robot interface (mode, program, axes)
-│   ├── conveyor-card.tsx       # Conveyor monitoring (speed, material count)
-│   ├── drive-card.tsx          # Drive control (frequency, torque, PF)
-│   └── cylinder-card.tsx       # Cylinder control (position, errors)
-├── panels/                 # Dashboard panels
-│   ├── line-control-panel.tsx    # Line mode control (auto/setup/init/end)
-│   ├── line-statistics-panel.tsx # Production stats (OK/NOK parts)
-│   ├── alarm-panel.tsx           # Alarm management with filtering
-│   └── trend-chart.tsx           # Data visualization with Recharts
-├── layout/                 # Layout components
-│   ├── header.tsx              # Main header with connection status
-│   └── sidebar.tsx             # Navigation sidebar
-├── providers/              # React Context providers (nested hierarchy)
-│   ├── theme-provider.tsx           # Dark/light mode
-│   ├── sidebar-provider.tsx        # Sidebar state management
-│   ├── opcua-data-provider.tsx     # OPC UA connection data
-│   ├── hmi-initializer-provider.tsx # HMI initialization
-│   ├── hmi-data-provider.tsx       # HMI data exposure
-│   ├── line-status-provider.tsx    # Line status context
-│   ├── line-statistics-provider.tsx # Production stats context
-│   ├── alarm-notification-provider.tsx # Alarm notifications
-│   └── alarm-notification-wrapper.tsx # Alarm UI wrapper
-├── shared/                 # Reusable UI components
-│   ├── status-badge.tsx       # Status indicators with colors
-│   ├── value-display.tsx      # Value displays with units
-│   └── progress-bar.tsx       # Progress indicators
-├── stations/               # Station components
-│   └── station-card.tsx        # Production station cards
-└── ui/                     # shadcn/ui components
-    ├── badge.tsx
-    ├── button.tsx
-    ├── card.tsx
-    ├── dialog.tsx
-    ├── input.tsx
-    ├── progress.tsx
-    ├── scroll-area.tsx
-    ├── select.tsx
-    ├── separator.tsx
-    ├── switch.tsx
-    └── tooltip.tsx
-
-hooks/                     # Custom React hooks
-├── use-opcua.ts               # OPC UA operations hook
-├── use-opcua-subscription.ts  # Subscription management
-├── use-hmi-manager.ts         # HMI manager access
-└── use-connection.ts          # Connection status monitoring
-
-lib/                       # Core libraries
-├── domain/                 # Domain models (event-driven)
-│   ├── line.ts               # Production line (status, modes, stats)
-│   ├── station.ts            # Station model with device management
-│   ├── device.ts             # Base device model with events
-│   ├── motor.ts              # Motor-specific model
-│   ├── valve.ts              # Valve-specific model
-│   ├── sensor.ts             # Sensor-specific model
-│   ├── robot.ts              # Robot-specific model
-│   ├── conveyor.ts           # Conveyor-specific model
-│   ├── drive.ts              # Drive-specific model
-│   ├── cylinder.ts           # Cylinder-specific model
-│   └── order.ts              # Production order model
-├── opcua-service.ts         # OPC UA service layer (connection, subs)
-├── opcua-errors.ts          # Custom error types
-├── opcua-utils.ts           # OPC UA utilities
-├── node-mapper.ts           # Node ID mapping helpers
-├── hmi-manager.ts           # HMI orchestration (discovery, events)
-├── hmi-locator.ts           # HMI structure discovery from OPC UA
-├── constants.ts             # App constants
-└── utils.ts                 # Utility functions (cn() helper)
-
-types/                     # TypeScript definitions
-├── alarm.types.ts          # Alarm types (severity, state)
-├── common.types.ts         # Shared types (status, mode)
-├── device.types.ts         # Device interfaces
-├── domain.types.ts         # Domain model types
-├── opcua.types.ts          # OPC UA types (node IDs, values)
-├── station.types.ts        # Station interfaces
-└── ui.types.ts             # UI component props
-
-actions/                   # Server actions
-├── cylinder-actions.ts     # Cylinder operations
-├── line-actions.ts         # Line operations (mode, reset)
-└── station-actions.ts      # Station operations
-
-config/
-├── components.json         # shadcn/ui configuration
-├── next.config.mjs         # Next.js configuration
-├── tailwind.config.ts      # Tailwind CSS with custom theme
-└── tsconfig.json           # TypeScript with strict mode
+```bash
+npm install          # install deps
+npm run dev          # dev server (localhost:3000)
+npm run build        # production build
+npm run start        # serve production build
+npm run lint         # ESLint via Next.js
 ```
 
-## Key Architectural Patterns
+No test runner configured. No test files exist in the codebase.
 
-### 1. Domain-Driven Design with Event Emitters
-
-**Domain Models** (`lib/domain/`):
-
-- Each entity (Line, Station, Device) is a rich domain model
-- Models emit events on state changes
-- Automatic OPC UA subscription management
-- Business logic encapsulated in models
-
-**Example**:
-
-```typescript
-// Line model manages production line state
-const line = new Line(nodeId, opcuaService);
-line.on("statusChanged", (newStatus) => {
-  /* handle update */
-});
-line.on("statisticsUpdated", (stats) => {
-  /* handle stats */
-});
-```
-
-### 2. HMI Manager Orchestration
-
-**Central Orchestration** (`lib/hmi-manager.ts`):
-
-- Discovers stations and devices from OPC UA
-- Manages subscription lifecycle
-- Emits events for UI updates
-- Supports hot-reload (re-discover without restart)
-
-**Usage Pattern**:
-
-```typescript
-const hmi = new HMIManager(opcuaService);
-await hmi.initialize();
-hmi.on("structureDiscovered", (structure) => {
-  /* render UI */
-});
-```
-
-### 3. Provider Hierarchy (Nested Composition)
+## Project Structure
 
 ```
-ThemeProvider (theme)
-└── ConnectionProvider (OPC UA connection)
-    └── OPCUADataProvider (connection data)
-        └── HMIDataProvider (HMI manager instance)
-            └── HMIInitializerProvider (auto-init on mount)
-                └── SidebarProvider (UI state)
-                    └── LineStatusProvider (line status)
-                        └── LineStatisticsProvider (production stats)
-                            └── AlarmNotificationWrapper (alarms)
+src/
+├── app/
+│   ├── (dashboard)/            # Dashboard layout group (Header + Sidebar)
+│   │   ├── _actions/           # Server Actions (private folder, not a route)
+│   │   │   ├── alarm-actions.ts
+│   │   │   ├── cylinder-actions.ts
+│   │   │   ├── drive-actions.ts
+│   │   │   ├── line-actions.ts
+│   │   │   └── station-actions.ts
+│   │   ├── alarms/             # Alarm management page
+│   │   ├── dashboard/          # Main production overview
+│   │   ├── devices/            # Device monitoring page
+│   │   ├── mock-data/          # Mock data page (dev testing)
+│   │   ├── settings/           # System configuration
+│   │   ├── trends/             # Historical trends
+│   │   ├── layout.tsx          # Dashboard layout (Header + Sidebar + main)
+│   │   ├── loading.tsx         # Route transition skeleton
+│   │   └── error.tsx           # Dashboard error boundary
+│   ├── api/
+│   │   ├── hmi/                # HMI APIs (events/initialize/reset)
+│   │   └── opcua/              # OPC UA APIs (browse/connect/read/write)
+│   ├── layout.tsx              # Root layout (Providers + fonts)
+│   ├── page.tsx                # Landing page (redirects to /dashboard)
+│   ├── error.tsx               # Root error boundary
+│   ├── not-found.tsx           # 404 page
+│   └── globals.css
+├── components/
+│   ├── devices/                # Device cards (base + 7 types)
+│   ├── layout/                 # Header, Sidebar
+│   ├── notifications/          # AlarmNotification + AlarmNotificationWrapper
+│   ├── panels/                 # AlarmPanel, LineControl, LineStats, TrendChart
+│   ├── providers/              # All context providers (composed in index.tsx)
+│   │   └── index.tsx           # Composed Providers component + hook re-exports
+│   ├── shared/                 # StatusBadge, ValueDisplay, ProgressBar
+│   ├── stations/               # StationCard
+│   └── ui/                     # shadcn/ui components (no barrel export)
+├── lib/
+│   ├── server/                 # Server-only modules (node-opcua imports)
+│   │   ├── opcua-service.ts   # OPC UA connection, read/write, subscriptions
+│   │   ├── hmi-manager.ts     # HMI orchestration (discovery, events)
+│   │   ├── hmi-locator.ts     # Singleton accessor for HMIManager
+│   │   ├── alarm-manager.ts   # Alarm detection from device errors
+│   │   ├── alarm-locator.ts   # Singleton accessor for AlarmManager
+│   │   ├── node-mapper.ts     # OPC UA node ID mapping
+│   │   ├── opcua-errors.ts    # Custom error types + validation helpers
+│   │   ├── opcua-utils-server.ts # Server-side OPC UA data conversion
+│   │   └── index.ts            # Barrel export
+│   ├── domain/                 # Domain models (all extend Device base)
+│   │   ├── device.ts           # Base device class (EventEmitter, OPC UA subs)
+│   │   ├── motor.ts, valve.ts, sensor.ts, robot.ts
+│   │   ├── conveyor.ts, drive.ts, cylinder.ts
+│   │   ├── station.ts, line.ts, order.ts
+│   │   └── index.ts
+│   ├── constants.ts            # Status colors/labels
+│   ├── mock-data.ts            # Mock data generator
+│   ├── opcua-utils.ts          # Client-safe OPC UA utilities
+│   └── utils.ts                # cn(), formatTimestamp(), formatDuration()
+└── types/                       # TypeScript definitions (barrel in index.ts)
+    ├── alarm.types.ts, device.types.ts, device.dto.ts
+    ├── domain.types.ts, station.types.ts, opcua.types.ts, ui.types.ts
+    └── index.ts
 ```
 
-**Why Nested?**: Each provider depends on the parent's context. This ensures proper initialization order and clean unmounting.
+## Architecture
 
-### 4. Route-Based Subscriptions
+### Provider Hierarchy (top → bottom)
 
-**Optimization Pattern** (`hooks/use-opcua-subscription.ts`):
-
-- Each page subscribes only to relevant nodes
-- Unsubscribe on route change
-- Configurable sampling intervals per node
-
-**Example**:
-
-```typescript
-// In dashboard page
-useOPCUASubscription([
-  { nodeId: "ns=2;s=Line.Status", samplingInterval: 1000 },
-  { nodeId: "ns=2;s=Line.Mode", samplingInterval: 500 },
-]);
+```
+Providers (composed in components/providers/index.tsx)
+└── ThemeProvider
+    └── ConnectionProvider
+        └── OPCUADataProvider
+            └── HMIDataProvider
+                └── HMISSEProvider (Server-Sent Events)
+                    └── HMIInitializerProvider (auto-connect + init)
+                        └── SidebarProvider
+                            └── LineStatusProvider
+                                └── LineStatisticsProvider
 ```
 
-### 5. Device Card Extensibility
-
-**Base Pattern** (`components/devices/base-device-card.tsx`):
-
-- Extensible base component for all devices
-- Status-based styling with glow effects
-- Consistent layout: icon, name, status badge
-- Click handlers for device details
-
-**Adding New Device**:
-
-1. Create domain model in `lib/domain/{device}.ts`
-2. Create card extending base in `components/devices/{device}-card.tsx`
-3. Add type to `types/device.types.ts`
-4. System auto-discovers from OPC UA
-
-## Key Patterns
-
-### OPC UA Integration
-
-- **Service Layer**: Use [`lib/opcua-service.ts`](lib/opcua-service.ts) for all OPC UA operations
-- **Connection Management**: Heartbeat monitoring with auto-reconnect (3 attempts, backoff)
-- **Error Handling**: Custom error types in [`lib/opcua-errors.ts`](lib/opcua-errors.ts)
-- **Node Mapping**: Helper utilities in [`lib/node-mapper.ts`](lib/node-mapper.ts)
-
-### API Routes
-
-**OPC UA Operations** (`/api/opcua/`):
-
-- `connect` - Establish/close connection with security modes
-- `read` - Read single or multiple node values
-- `write` - Write values to nodes
-- `subscribe` - Create monitored item subscriptions
-- `browse` - Browse OPC UA address space
-
-**HMI Operations** (`/api/hmi/`):
-
-- `initialize` - Initialize HMI manager and discover structure
-- `read` - Read current HMI state
-- `reset` - Reset HMI manager state
-
-### Device Cards
-
-- **Base Component**: Extend [`components/devices/base-device-card.tsx`](components/devices/base-device-card.tsx)
-- **Device Types**: Defined in [`types/device.types.ts`](types/device.types.ts)
-- **Domain Models**: Each device has a model in [`lib/domain/`](lib/domain/)
-- **Status Styling**: Automatic colors based on device status
-
-### Styling Conventions
-
-- **Utility Function**: Use `cn()` from [`lib/utils.ts`](lib/utils.ts) for conditional classes
-- **Component Library**: Follow shadcn/ui patterns for consistency
-- **Theme**: Dark/light mode via [`components/providers/theme-provider.tsx`](components/providers/theme-provider.tsx)
-- **Status Colors**: Green (running), Yellow (warning), Red (error/fault), Gray (stopped)
-
-### Type Safety
-
-- **Domain Types**: Rich types in [`lib/domain/`](lib/domain/) for business entities
-- **API Types**: Request/response types in [`types/opcua.types.ts`](types/opcua.types.ts)
-- **UI Types**: Component prop types in [`types/ui.types.ts`](types/ui.types.ts)
-- **Strict Mode**: TypeScript strict mode enabled
-
-## Special Features
+Root layout wraps `<Providers>` with `<AlarmNotificationWrapper>` (from `components/notifications/`).
 
 ### Real-Time Data Flow
 
-1. **PLC Change** → OPC UA Server detects value change
-2. **Subscription** → OPC UA Service receives notification
-3. **Domain Model** → Model updates internal state, emits event
-4. **Provider** → React context updates with new data
-5. **Component** → UI re-renders with new value
+1. PLC value change → OPC UA subscription notification
+2. Domain model updates state, emits event
+3. SSE streams updates to client via `/api/hmi/events`
+4. React context providers update
+5. Components re-render
 
-### Alarm Management
+### Key Singletons (server-side, via `globalThis`)
 
-- **Hierarchical**: Critical, Warning, Info levels
-- **Notifications**: Toast notifications with acknowledgment
-- **Panel**: Dedicated alarm page with filtering/sorting
-- **Visual**: Badges and indicators throughout UI
+- `HMILocator` — get/init `HMIManager` across Server Actions and API routes
+- `AlarmLocator` — get/init `AlarmManager` for alarm operations
 
-### Line Control
+### Domain Models
 
-- **Modes**: Auto, Setup, Init, End, Error
-- **Statistics**: OK/NOK part counting, efficiency tracking
-- **Operations**: Reset statistics, acknowledge errors
-- **Status**: Real-time line status with visual indicators
+All devices extend the `Device` base class (`lib/domain/device.ts`). Each model:
 
-### Hot Reload Capability
+- Manages OPC UA subscriptions for its nodes
+- Emits events on state changes
+- Encapsulates device-specific business logic
+- Uses `NodeMapper` for node ID mapping
 
-- Add new stations to PLC → HMI auto-discovers
-- Remove devices → UI updates automatically
-- No code changes required for structure changes
-- Re-discover on-demand via HMI Manager
+## Code Conventions
+
+- **Imports**: Use `@/` path alias (maps to `src/`). Import hooks from `@/components/providers`, server modules from `@/lib/server`
+- **Components**: kebab-case filenames (`motor-card.tsx`). Barrel exports via `index.ts` in each directory (except `ui/`)
+- **Server Actions**: `"use server"` directive, live in `app/(dashboard)/_actions/`
+- **Client Components**: `"use client"` directive required for all components with hooks/state
+- **Styling**: `cn()` utility from `@/lib/utils` for conditional Tailwind classes
+- **Status Colors**: `bg-status-running` (green), `bg-status-stopped` (gray), `bg-status-fault` (red), `bg-status-warning` (yellow)
+- **Types**: Centralized in `src/types/` with barrel export. No co-located type files
+- **Domain Models**: PascalCase classes extending `Device` in `src/lib/domain/`
+
+## Environment Variables
+
+All variables are `NEXT_PUBLIC_` (exposed to client). Configured in `.env.local`:
+
+```bash
+# OPC UA Connection
+NEXT_PUBLIC_OPCUA_ENDPOINT_URL=opc.tcp://192.168.1.91:4840
+NEXT_PUBLIC_OPCUA_NAMESPACE=4
+
+# Timing (milliseconds)
+NEXT_PUBLIC_OPCUA_SAMPLING_INTERVAL=100
+NEXT_PUBLIC_RECONNECT_INTERVAL_MS=5000
+NEXT_PUBLIC_RECONNECT_FIRST_DELAY_MS=1000
+NEXT_PUBLIC_CONNECTION_SYNC_INTERVAL_MS=2000
+NEXT_PUBLIC_SSE_KEEPALIVE_INTERVAL_MS=30000
+NEXT_PUBLIC_HEADER_ALARM_POLL_INTERVAL_MS=1000
+NEXT_PUBLIC_ALARM_POLL_INTERVAL=1000
+NEXT_PUBLIC_ALARM_AUTO_DISMISS_DURATION=5000
+```
+
+## Adding a New Device Type
+
+1. Create domain model: `src/lib/domain/mydevice.ts` extending `Device`
+2. Add type to `src/types/device.types.ts`
+3. Create card: `src/components/devices/mydevice-card.tsx` extending `BaseDeviceCard`
+4. Add export to `src/components/devices/index.ts`
+5. HMI Manager auto-discovers from OPC UA — no wiring needed
+
+## DO NOTs
+
+- **Do not** import from `src/lib/server/` in client components — those modules use `node-opcua` (Node.js only)
+- **Do not** add barrel exports to `src/components/ui/` — shadcn CLI expects direct file paths
+- **Do not** put business logic in React components — keep it in domain models (`lib/domain/`)
+- **Do not** poll when OPC UA subscriptions are available — use SSE or subscriptions instead
+- **Do not** modify `lib/domain/index.ts` barrel without updating all consumers
+- **Do not** create new top-level directories — new code goes in `src/`
+- **Do not** hardcode OPC UA node IDs — use `NodeMapper` for all node references
+
+## External Dependencies
+
+- **OPC UA Server**: Siemens PLC at the configured endpoint. The app connects as a client — the PLC server must be running for the HMI to function
+- **No database**: State lives in the PLC/domain models in memory. No persistence layer
+- **No auth**: No authentication or authorization system
+- **No CI/CD**: No GitHub Actions or deployment pipeline configured
 
 ## Workflow Orchestration
 
@@ -354,49 +226,3 @@ useOPCUASubscription([
 - When given bug report: just fix it
 - Point at logs, errors, failing tests - then resolve
 - Zero context switching required from user
-
-## Core Principles
-
-- **Simplicity First**: Make every change as simple as possible
-- **No Laziness**: Find root causes. No temporary fixes
-- **Minimal Impact**: Changes should only touch what's necessary
-- **Trust Domain Models**: Business logic belongs in domain models, not components
-- **Event-Driven**: Use events, not prop drilling, for cross-component communication
-
-## Quick Reference
-
-### Adding a New Device Type
-
-1. **Domain Model**: Create `lib/domain/mydevice.ts` extending `Device`
-2. **Type Definition**: Add to `types/device.types.ts`
-3. **Component**: Create `components/devices/mydevice-card.tsx` extending `BaseDeviceCard`
-4. **Discovery**: HMI Manager auto-discovers from OPC UA structure
-5. **No wiring needed**: System handles subscription and updates automatically
-
-### Debugging Connection Issues
-
-1. Check [`lib/opcua-service.ts`](lib/opcua-service.ts) logs
-2. Verify endpoint in `.env.local`
-3. Check OPC UA server is running
-4. Review browser console for SSE errors
-5. Use `/opcua-demo` page to test connection
-
-### Performance Optimization
-
-- Route-based subscriptions minimize network traffic
-- Domain models cache values and batch updates
-- React.memo on device cards prevents unnecessary re-renders
-- Sampling intervals configurable per node
-- Provider hierarchy ensures minimal re-render scope
-
-## Environment Variables
-
-```bash
-# OPC UA Connection
-OPCUA_ENDPOINT=opc.tcp://localhost:4840
-OPCUA_SECURITY_MODE=None  # None, Sign, SignAndEncrypt
-
-# Application
-NEXT_PUBLIC_APP_NAME=HMI System
-NODE_ENV=development
-```

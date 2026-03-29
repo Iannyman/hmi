@@ -10,7 +10,18 @@
       "Bash(npx tsc:*)",
       "Bash(ls:*)",
       "Bash(npm run build:*)",
-      "Bash(printf '%s\\\\n' '/**' '* HMI Data API Route' '*/' '' 'import { NextResponse } from \"\"next/server\"\";' 'import hmiManager from \"\"@/lib/hmi-manager\"\";' '' 'export async function GET\\(\\) {' '  const stations = hmiManager.getAllStations\\(\\);' '  ' '  const stationsData = stations.map\\(\\(s\\) => \\({' '    id: s.id,' '    name: s.name,' '    mode: s.mode,' '    partsOK: s.partsOK,' '    partsNOK: s.partsNOK,' '    efficiency: s.getEfficiency\\(\\),' '    status: s.status,' '  }\\)\\);' '  ' '  return NextResponse.json\\({ success: true, data: { stations: stationsData } }\\);' '}')"
+      "Bash(printf '%s\\\\n' '/**' '* HMI Data API Route' '*/' '' 'import { NextResponse } from \"\"next/server\"\";' 'import hmiManager from \"\"@/lib/hmi-manager\"\";' '' 'export async function GET\\(\\) {' '  const stations = hmiManager.getAllStations\\(\\);' '  ' '  const stationsData = stations.map\\(\\(s\\) => \\({' '    id: s.id,' '    name: s.name,' '    mode: s.mode,' '    partsOK: s.partsOK,' '    partsNOK: s.partsNOK,' '    efficiency: s.getEfficiency\\(\\),' '    status: s.status,' '  }\\)\\);' '  ' '  return NextResponse.json\\({ success: true, data: { stations: stationsData } }\\);' '}')",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js|jsx\\)$\")",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/)",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/alarms/)",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/dashboard/)",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/devices/)",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/mock-data/)",
+      "Bash(ls -la app/\\\\\\(dashboard\\\\\\)/settings/)",
+      "Bash(git mv:*)",
+      "Bash(npm run:*)",
+      "Bash(npx next:*)",
+      "Bash(npx eslint:*)"
     ]
   },
   "enabledPlugins": {
