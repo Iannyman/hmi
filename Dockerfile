@@ -1,7 +1,7 @@
 FROM node:20-bookworm-slim
 
 # Install dependencies for native addons (node-opcua)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     make \
     g++ \
@@ -10,9 +10,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 COPY . .
+
+RUN chown -R node:node /app
+USER node
 
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
