@@ -4,6 +4,9 @@ const nextConfig = {
    * The app works fine from other devices on your network.
    * This will be configurable in future Next.js versions. */
 
+  // Docker: output standalone for minimal production image
+  output: 'standalone',
+
   // Explicitly mark packages as external to prevent bundling issues
   serverExternalPackages: ['node-opcua'],
 
