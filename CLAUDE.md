@@ -1,5 +1,45 @@
 # HMI System
 
+## Workflow Orchestration
+
+### 1. Plan First
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis
+- For complex problems, throw more compute at it via subagents
+
+### 3. Self-Improvement Loop
+
+- After ANY correction: update "tasks/lessons.md" with the pattern
+- Write rules that prevent the same mistake
+- Review lessons at session start for relevant context
+
+### 4. Verification Before Done
+
+- Never mark complete without proving it works
+- Ask: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+
+- For non-trivial changes: pause for "more elegant way?"
+- If fix feels hacky: implement the elegant solution
+- Skip for simple, obvious fixes - don't over-engineer
+
+### 6. Autonomous Bug Fixing
+
+- When fixing a bug, always verify the root cause before implementing a fix. Read the relevant code first, confirm the actual issue, then fix.
+- Never suppress ESLint errors with comments — always fix the underlying issue.
+- After fixing, re-read the changed file to confirm the edit applied correctly, especially for multi-location changes.
+- Point at logs, errors, failing tests - then resolve
+- Zero context switching required from user
+
 ## Project Overview
 
 Industrial Human-Machine Interface (HMI) for monitoring and controlling PLC-driven manufacturing systems via OPC UA. The UI is dynamically generated from the OPC UA server structure — the PLC is the single point of change. Add/remove stations or devices without code changes.
@@ -188,41 +228,3 @@ NEXT_PUBLIC_ALARM_AUTO_DISMISS_DURATION=5000
 - **No database**: State lives in the PLC/domain models in memory. No persistence layer
 - **No auth**: No authentication or authorization system
 - **No CI/CD**: No GitHub Actions or deployment pipeline configured
-
-## Workflow Orchestration
-
-### 1. Plan First
-
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
-- If something goes sideways, STOP and re-plan immediately
-- Write detailed specs upfront to reduce ambiguity
-
-### 2. Subagent Strategy
-
-- Use subagents liberally to keep main context window clean
-- Offload research, exploration, and parallel analysis
-- For complex problems, throw more compute at it via subagents
-
-### 3. Self-Improvement Loop
-
-- After ANY correction: update "tasks/lessons.md" with the pattern
-- Write rules that prevent the same mistake
-- Review lessons at session start for relevant context
-
-### 4. Verification Before Done
-
-- Never mark complete without proving it works
-- Ask: "Would a staff engineer approve this?"
-- Run tests, check logs, demonstrate correctness
-
-### 5. Demand Elegance (Balanced)
-
-- For non-trivial changes: pause for "more elegant way?"
-- If fix feels hacky: implement the elegant solution
-- Skip for simple, obvious fixes - don't over-engineer
-
-### 6. Autonomous Bug Fixing
-
-- When given bug report: just fix it
-- Point at logs, errors, failing tests - then resolve
-- Zero context switching required from user

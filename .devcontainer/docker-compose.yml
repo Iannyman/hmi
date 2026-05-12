@@ -1,0 +1,24 @@
+services:
+  hmi:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app
+      - hmi_node_modules:/app/node_modules
+    environment:
+      - NEXT_PUBLIC_OPCUA_ENDPOINT_URL=opc.tcp://192.168.1.91:4840
+      - NEXT_PUBLIC_OPCUA_NAMESPACE=4
+      - NEXT_PUBLIC_OPCUA_SAMPLING_INTERVAL=100
+      - NEXT_PUBLIC_RECONNECT_INTERVAL_MS=5000
+      - NEXT_PUBLIC_RECONNECT_FIRST_DELAY_MS=1000
+      - NEXT_PUBLIC_CONNECTION_SYNC_INTERVAL_MS=2000
+      - NEXT_PUBLIC_SSE_KEEPALIVE_INTERVAL_MS=30000
+      - NEXT_PUBLIC_HEADER_ALARM_POLL_INTERVAL_MS=1000
+      - NEXT_PUBLIC_ALARM_POLL_INTERVAL=1000
+      - NEXT_PUBLIC_ALARM_AUTO_DISMISS_DURATION=5000
+
+volumes:
+  hmi_node_modules:
