@@ -9,13 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+COPY --chown=node:node package.json package-lock.json* ./
+USER node
 RUN npm install
 
-COPY . .
-
-RUN chown -R node:node /app
-USER node
+COPY --chown=node:node . .
 
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
