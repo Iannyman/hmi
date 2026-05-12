@@ -1,10 +1,25 @@
 {
-  "name": "HMI Dev",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "hmi",
+  "name": "${localWorkspaceFolderBasename}",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "workspaceFolder": "/app",
-  "forwardPorts": [3000],
-  "postStartCommand": "npm install --legacy-peer-deps",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ],
+  "forwardPorts": [
+    4000
+  ],
+  // "postCreateCommand": "npm install --legacy-peer-deps",
+  "runArgs": [
+    "--publish",
+    "4000:4000",
+    "--name=dev-${localWorkspaceFolderBasename}",
+    "--env-file",
+    ".env"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,7 +28,7 @@
         "ms-vscode.vscode-typescript-next"
       ],
       "settings": {
-        "typescript.tsdk": "/app/node_modules/typescript/lib"
+        "js/ts.tsdk.path": "/app/node_modules/typescript/lib"
       }
     }
   }
