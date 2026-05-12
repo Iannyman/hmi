@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /app && chown node:node /app
 WORKDIR /app
 
 COPY --chown=node:node package.json package-lock.json* ./
