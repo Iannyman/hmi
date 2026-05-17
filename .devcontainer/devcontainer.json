@@ -8,7 +8,6 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
   "mounts": [
     "source=${localWorkspaceFolderBasename}_devcontainer_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
-    // Share Claude Code auth + config from LXC host into dev container
     "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,consistency=cached"
   ],
   "forwardPorts": [
