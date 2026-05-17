@@ -22,6 +22,10 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       NEXT_PUBLIC_OPCUA_ENDPOINT_URL?: string;
+      S7_HOST?: string;
+      S7_PORT?: string;
+      S7_RACK?: string;
+      S7_SLOT?: string;
     }
   }
 }

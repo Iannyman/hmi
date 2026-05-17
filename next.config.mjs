@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['node-opcua'],
+  serverExternalPackages: ['node-opcua', 'nodes7'],
 
   allowedDevOrigins: ['192.168.1.130', 'hmi.tdaniel.win'],
 

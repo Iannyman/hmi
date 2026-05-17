@@ -13,3 +13,22 @@ export {
   validateDataType,
   validateEndpointUrl,
 } from "./opcua-errors";
+
+// S7 Communication
+export { S7Locator } from "./s7-locator";
+export { default as s7Service, S7Service } from "./s7-service";
+export { S7_ADDRESS_MAP } from "./s7-address-map";
+export {
+  S7ConnectionError,
+  S7NotConnectedError,
+  S7ReadError,
+  S7WriteError,
+  S7ValidationError,
+  createSuccessResponse as createS7SuccessResponse,
+  createErrorResponse as createS7ErrorResponse,
+  createNotConnectedResponse as createS7NotConnectedResponse,
+  createValidationErrorResponse as createS7ValidationErrorResponse,
+  validateS7Address,
+  validateS7Host,
+  handleServiceError as handleS7ServiceError,
+} from "./s7-errors";

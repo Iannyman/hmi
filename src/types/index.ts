@@ -22,3 +22,6 @@ export * from './station.types';
 
 // Alarm types
 export * from './alarm.types';
+
+// S7 PLC communication types
+export * from './s7.types';
