@@ -120,9 +120,10 @@ export function BaseDeviceCard({
           {deviceSettingsContent && (
             <button
               onClick={openDialog}
-              className="p-1.5 rounded-lg text-[hsl(var(--text-muted))] hover:text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all duration-200"
+              className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[hsl(var(--text-muted))] hover:text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all duration-200"
             >
-              <Wrench className="w-3.5 h-3.5" />
+              <Wrench className="w-4 h-4" />
+              <span className="text-xs font-medium hidden sm:inline">Settings</span>
             </button>
           )}
           <StatusBadge status={status} size="sm" />
