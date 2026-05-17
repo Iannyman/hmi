@@ -15,7 +15,7 @@ import { useEffect, useState, useRef } from "react";
 import { useS7 } from "./s7-hook";
 import { useS7ConnectionSetter } from "./s7-connection-provider";
 
-const S7_RECONNECT_INTERVAL_MS = parseInt(process.env.S7_RECONNECT_INTERVAL_MS || "5000", 10);
+const S7_RECONNECT_INTERVAL_MS = parseInt(process.env.NEXT_PUBLIC_S7_RECONNECT_INTERVAL_MS || "5000", 10);
 
 export function S7InitializerProvider({ children }: { children: React.ReactNode }) {
   const { isConnected, isLoading, connect, disconnect, checkConnection } = useS7();
@@ -24,8 +24,12 @@ export function S7InitializerProvider({ children }: { children: React.ReactNode 
 
   const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasStartedReconnectingRef = useRef(false);
+  const isAttemptingRef = useRef(false);
 
   const attemptConnect = async (forceDisconnect = false): Promise<boolean> => {
+    if (isAttemptingRef.current) return false;
+    isAttemptingRef.current = true;
+
     try {
       if (forceDisconnect) {
         console.log("[S7Init] Disconnecting to clear stale state...");
@@ -38,14 +42,20 @@ export function S7InitializerProvider({ children }: { children: React.ReactNode 
       if (success) {
         console.log("[S7Init] Successfully connected to S7 PLC");
         hasStartedReconnectingRef.current = false;
-        setInitAttempted(true);
         setIsS7Connected(true);
-        return true;
+      } else {
+        setIsS7Connected(false);
       }
-      return false;
+
+      setInitAttempted(true);
+      return success;
     } catch (err) {
       console.error("[S7Init] Failed to connect:", err);
+      setInitAttempted(true);
+      setIsS7Connected(false);
       return false;
+    } finally {
+      isAttemptingRef.current = false;
     }
   };
 
@@ -120,7 +130,7 @@ export function S7InitializerProvider({ children }: { children: React.ReactNode 
         console.log("[S7Init] Syncing connection state:", isConnected, "->", actuallyConnected);
         setIsS7Connected(actuallyConnected);
       }
-    }, parseInt(process.env.S7_CONNECTION_SYNC_INTERVAL_MS || "5000", 10));
+    }, parseInt(process.env.NEXT_PUBLIC_CONNECTION_SYNC_INTERVAL_MS || "5000", 10));
 
     return () => clearInterval(syncInterval);
   }, [initAttempted, isConnected]);

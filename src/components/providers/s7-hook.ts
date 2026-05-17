@@ -68,6 +68,10 @@ export function useS7() {
   const checkConnection = useCallback(async (): Promise<boolean> => {
     try {
       const response = await fetch("/api/s7/connect");
+      if (!response.ok) {
+        setIsConnected(false);
+        return false;
+      }
       const result = await response.json();
       setIsConnected(result.connected);
       return result.connected;
@@ -107,6 +111,9 @@ export function useS7() {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.details || result.error);
+    if (!Array.isArray(result.data) || result.data.length === 0) {
+      throw new Error("Empty read result");
+    }
     return result.data[0];
   }, []);
 

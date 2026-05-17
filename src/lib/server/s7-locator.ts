@@ -16,7 +16,7 @@ class S7Locator {
     const instance = global.__S7_SERVICE_INSTANCE__;
     if (!instance) {
       throw new Error(
-        "S7 Service not initialized. Call S7Locator.initialize() first."
+        "S7 Service not initialized. The S7Service singleton is created automatically on import."
       );
     }
     return instance;

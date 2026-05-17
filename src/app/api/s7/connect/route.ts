@@ -17,7 +17,15 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: Partial<S7Config> = await request.json().catch(() => ({}));
+    let body: Partial<S7Config>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
 
     const host = body.host || process.env.S7_HOST;
     if (!host) {

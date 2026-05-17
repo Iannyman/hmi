@@ -63,6 +63,7 @@ export function createErrorResponse(error: string | Error, status: number = 500)
 
   return NextResponse.json(
     {
+      success: false,
       error: message,
       details: typeof error === "object" ? error.message : undefined,
     },
@@ -73,6 +74,7 @@ export function createErrorResponse(error: string | Error, status: number = 500)
 export function createNotConnectedResponse(): NextResponse {
   return NextResponse.json(
     {
+      success: false,
       error: "Not connected to S7 PLC",
       details: "Please connect to an S7 PLC before performing this operation",
     },
@@ -83,6 +85,7 @@ export function createNotConnectedResponse(): NextResponse {
 export function createValidationErrorResponse(message: string): NextResponse {
   return NextResponse.json(
     {
+      success: false,
       error: "Validation error",
       details: message,
     },
@@ -112,7 +115,7 @@ export function validateS7Address(address: string): void {
 export function validateS7Host(host: string): void {
   validateRequired(host, "host");
 
-  const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
+  const isIp = /^(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})$/.test(host);
   const isHostname = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/.test(host);
   if (!isIp && !isHostname) {
     throw new S7ValidationError(`Invalid host: "${host}"`);

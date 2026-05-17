@@ -177,11 +177,13 @@ class S7Service {
     const tempNames = addresses.map((addr, i) => `__temp_${i}_${addr}`);
     this.conn!.addItems(tempNames);
 
-    const values = await this.readAllItemsInternal();
-
-    // Remove temp items and restore standard translation
-    this.conn!.removeItems(tempNames);
-    this.restoreTranslation();
+    let values: Record<string, unknown>;
+    try {
+      values = await this.readAllItemsInternal();
+    } finally {
+      this.conn!.removeItems(tempNames);
+      this.restoreTranslation();
+    }
 
     const now = new Date();
     return addresses.map((address, i) => ({
@@ -249,11 +251,12 @@ class S7Service {
     const values = items.map((item) => item.value);
 
     this.conn!.addItems(tempNames);
-    await this.writeItemsInternal(tempNames, values);
-
-    // Clean up and restore
-    this.conn!.removeItems(tempNames);
-    this.restoreTranslation();
+    try {
+      await this.writeItemsInternal(tempNames, values);
+    } finally {
+      this.conn!.removeItems(tempNames);
+      this.restoreTranslation();
+    }
   }
 
   async writeByIndex(name: string, index: number, value: unknown): Promise<void> {
@@ -340,20 +343,27 @@ class S7Service {
   }
 
   private getBaseOffset(entry: S7ArrayEntry): number {
-    // Parse offset from address like "DB2,DINT40.10" → 40
     const match = entry.address.match(/,(\w+?)(\d+)/);
-    return match ? parseInt(match[2], 10) : 0;
+    if (!match) {
+      throw new S7ValidationError(`Invalid S7 address for base offset: ${entry.address}`);
+    }
+    return parseInt(match[2], 10);
   }
 
   private getDbNumber(address: string): string {
-    // "DB2,DINT40.10" → "DB2"
     const match = address.match(/^(DB\d+)/);
-    return match ? match[1] : "DB1";
+    if (!match) {
+      throw new S7ValidationError(`Invalid DB number in address: ${address}`);
+    }
+    return match[1];
   }
 }
 
-// Singleton instance
+// Singleton instance — also register in globalThis for S7Locator access
 const s7Service = new S7Service();
+if (!global.__S7_SERVICE_INSTANCE__) {
+  global.__S7_SERVICE_INSTANCE__ = s7Service;
+}
 
 export default s7Service;
 export { S7Service };

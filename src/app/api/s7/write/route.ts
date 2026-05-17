@@ -27,15 +27,25 @@ export async function POST(request: NextRequest) {
 
     // Write by name (with optional index)
     if (body.items) {
+      if (!Array.isArray(body.items)) {
+        return NextResponse.json({ error: "'items' must be an array" }, { status: 400 });
+      }
+      for (const item of body.items) {
+        if (typeof item.name !== "string") {
+          return NextResponse.json({ error: "Each item must have a 'name' (string)" }, { status: 400 });
+        }
+        if (item.index !== undefined && typeof item.index !== "number") {
+          return NextResponse.json({ error: "'index' must be a number" }, { status: 400 });
+        }
+      }
+
       const indexItems = body.items.filter((item: { index?: number }) => item.index !== undefined);
       const nameItems = body.items.filter((item: { index?: number }) => item.index === undefined);
 
-      // Write by index
       for (const item of indexItems) {
         await s7Service.writeByIndex(item.name, item.index, item.value);
       }
 
-      // Write by name
       if (nameItems.length > 0) {
         await s7Service.writeByName(
           nameItems.map((item: { name: string; value: unknown }) => ({
@@ -53,6 +63,15 @@ export async function POST(request: NextRequest) {
 
     // Write by raw address
     if (body.addresses) {
+      if (!Array.isArray(body.addresses)) {
+        return NextResponse.json({ error: "'addresses' must be an array" }, { status: 400 });
+      }
+      for (const item of body.addresses) {
+        if (typeof item.address !== "string") {
+          return NextResponse.json({ error: "Each address item must have an 'address' (string)" }, { status: 400 });
+        }
+      }
+
       await s7Service.writeByAddress(
         body.addresses.map((item: { address: string; value: unknown }) => ({
           address: item.address,

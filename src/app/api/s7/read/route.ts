@@ -28,24 +28,34 @@ export async function POST(request: NextRequest) {
 
     // Read by name
     if (body.names) {
+      if (!Array.isArray(body.names) || !body.names.every((n: unknown) => typeof n === "string")) {
+        return NextResponse.json({ error: "'names' must be an array of strings" }, { status: 400 });
+      }
       const values = await s7Service.readByName(body.names);
       return createSuccessResponse(values);
     }
 
     // Read by raw address
     if (body.addresses) {
+      if (!Array.isArray(body.addresses) || !body.addresses.every((a: unknown) => typeof a === "string")) {
+        return NextResponse.json({ error: "'addresses' must be an array of strings" }, { status: 400 });
+      }
       const values = await s7Service.readByAddress(body.addresses);
       return createSuccessResponse(values);
     }
 
     // Read array element by index
     if (body.items) {
+      if (!Array.isArray(body.items)) {
+        return NextResponse.json({ error: "'items' must be an array" }, { status: 400 });
+      }
       const results = [];
       for (const item of body.items) {
-        if (item.name && item.index !== undefined) {
-          const value = await s7Service.readByIndex(item.name, item.index);
-          results.push(value);
+        if (typeof item.name !== "string" || typeof item.index !== "number") {
+          return NextResponse.json({ error: "Each item must have 'name' (string) and 'index' (number)" }, { status: 400 });
         }
+        const value = await s7Service.readByIndex(item.name, item.index);
+        results.push(value);
       }
       return createSuccessResponse(results);
     }
