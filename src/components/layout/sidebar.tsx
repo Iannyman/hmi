@@ -14,7 +14,7 @@ import {
 import { getAlarms } from "@/app/(dashboard)/_actions/alarm-actions";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/providers/sidebar-provider";
-import { useConnection } from "@/components/providers";
+import { useConnection, useS7Connection } from "@/components/providers";
 
 // Polling interval for alarms (ms)
 const ALARM_POLL_INTERVAL = parseInt(process.env.NEXT_PUBLIC_ALARM_POLL_INTERVAL || "1000", 10);
@@ -32,6 +32,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { isOpen, close } = useSidebar();
   const { isConnected } = useConnection();
+  const { isS7Connected } = useS7Connection();
   const [activeAlarms, setActiveAlarms] = useState(0);
 
   // Fetch alarm count from Server Action
@@ -127,11 +128,19 @@ export function Sidebar() {
               "w-2 h-2 rounded-full",
               isConnected ? "bg-[hsl(var(--status-running))] glow-green animate-pulse" : "bg-[hsl(var(--status-fault))]"
             )}></span>
-            <span className="font-medium">PLC {isConnected ? "Connected" : "Disconnected"}</span>
+            <span className="font-medium">OPC UA {isConnected ? "Connected" : "Disconnected"}</span>
           </div>
-          <div className="flex items-center gap-2.5 text-[hsl(var(--text-muted))] px-3 py-2 rounded-lg bg-[hsl(var(--surface))] border border-[hsl(var(--border))]">
-            <span className="w-2 h-2 bg-[hsl(var(--status-running))] rounded-full glow-green animate-pulse"></span>
-            <span className="font-medium">DB Online</span>
+          <div className={cn(
+            "flex items-center gap-2.5 px-3 py-2 rounded-lg border",
+            isS7Connected
+              ? "text-[hsl(var(--text-muted))] bg-[hsl(var(--surface))] border-[hsl(var(--border))]"
+              : "text-[hsl(var(--status-fault))] bg-[hsl(var(--status-fault))/10 border-[hsl(var(--status-fault))]"
+          )}>
+            <span className={cn(
+              "w-2 h-2 rounded-full",
+              isS7Connected ? "bg-[hsl(var(--status-running))] glow-green animate-pulse" : "bg-[hsl(var(--status-fault))]"
+            )}></span>
+            <span className="font-medium">S7 {isS7Connected ? "Connected" : "Disconnected"}</span>
           </div>
         </div>
       </div>
