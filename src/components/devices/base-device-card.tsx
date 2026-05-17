@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import type { DeviceType, DeviceStatus } from "@/types/device.types";
-import { Settings, Wrench, Battery, Activity, Bot, ArrowRight, LoaderPinwheel } from "lucide-react";
+import { Settings, Battery, Activity, Bot, ArrowRight, LoaderPinwheel } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
+import { useLongPress } from "@/hooks/use-long-press";
+import { DeviceLongPressDialog } from "./device-long-press-dialog";
 
 interface BaseDeviceCardProps {
   id: string;
@@ -14,6 +17,8 @@ interface BaseDeviceCardProps {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+  longPressContent?: React.ReactNode;
+  longPressTitle?: string;
 }
 
 const deviceIcons: Record<DeviceType, React.ElementType> = {
@@ -77,17 +82,31 @@ export function BaseDeviceCard({
   children,
   onClick,
   className,
+  longPressContent,
+  longPressTitle,
 }: BaseDeviceCardProps) {
   const DeviceIcon = deviceIcons[type];
-  // Use status colors or fallback to 'stopped' for unknown statuses
   const colors = statusColors[status] || statusColors.stopped;
   const cardAnimation = getDeviceCardAnimation(status);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const hasLongPress = longPressContent !== undefined;
+
+  const { handlers: longPressHandlers, isPressed } = useLongPress({
+    delay: 500,
+    onLongPress: hasLongPress ? () => setIsDialogOpen(true) : () => {},
+    onPress: hasLongPress ? onClick : undefined,
+    moveThreshold: 10,
+  });
+
   return (
+    <>
     <div
-      onClick={onClick}
+      {...(hasLongPress ? longPressHandlers : {})}
+      onClick={hasLongPress ? undefined : onClick}
       className={cn(
-        "card card-hover p-3 sm:p-4 md:p-5 pb-4 sm:pb-5 md:pb-6 cursor-pointer group",
+        "card card-hover p-3 sm:p-4 md:p-5 pb-4 sm:pb-5 md:pb-6 cursor-pointer group transition-transform",
+        isPressed && hasLongPress && "scale-[0.98] opacity-90",
         cardAnimation,
         className
       )}
@@ -111,5 +130,16 @@ export function BaseDeviceCard({
       {/* Content */}
       <div>{children}</div>
     </div>
+
+    {hasLongPress && (
+      <DeviceLongPressDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={longPressTitle ?? name}
+      >
+        {longPressContent}
+      </DeviceLongPressDialog>
+    )}
+    </>
   );
 }
