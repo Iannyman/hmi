@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { BaseDeviceCard } from "./base-device-card";
 import { Button } from "@/components/ui/button";
-import { Move, Home, SkipForward, SkipBack, AlertTriangle, Gauge, Target } from "lucide-react";
+import { Move, Home, SkipForward, SkipBack, AlertTriangle, Gauge, Target, Save, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { DeviceDTO } from "@/types/device.dto";
@@ -93,6 +93,42 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
       location={stationName}
       onClick={onClick}
       className="w-full sm:min-w-[320px]"
+      longPressTitle={`${drive.name} — Position Teaching`}
+      longPressContent={
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-[hsl(var(--surface))] rounded-xl p-3 text-center border border-[hsl(var(--border))]">
+              <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                <Gauge className="w-4 h-4 text-[hsl(var(--text-muted))]" />
+                <span className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold">Position</span>
+              </div>
+              <p className="text-xl font-bold font-mono text-gradient">{drive.actPosition}</p>
+              <p className="text-[10px] text-[hsl(var(--text-muted))]">mm</p>
+            </div>
+            <div className="bg-[hsl(var(--surface))] rounded-xl p-3 text-center border border-[hsl(var(--border))]">
+              <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                <Target className="w-4 h-4 text-[hsl(var(--text-muted))]" />
+                <span className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold">Index</span>
+              </div>
+              <p className="text-xl font-bold font-mono text-gradient">{drive.actPositionIndex}</p>
+              <p className="text-[10px] text-[hsl(var(--text-muted))]">#</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20">
+            <MapPin className="w-4 h-4 text-[hsl(var(--accent))]" />
+            <span className="text-xs text-[hsl(var(--text-muted))]">Position teaching — coming soon</span>
+          </div>
+
+          <Button
+            disabled
+            className="w-full bg-gradient-to-r from-[hsl(var(--accent))] to-blue-600 text-white opacity-50 cursor-not-allowed"
+          >
+            <Save className="w-4 h-4" />
+            Save Current Position
+          </Button>
+        </div>
+      }
     >
       {/* Current State */}
       <div className="mb-3 sm:mb-4 md:mb-5 p-2 sm:p-3 md:p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))]">
