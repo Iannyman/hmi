@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type { DeviceType, DeviceStatus } from "@/types/device.types";
-import { Settings, Wrench, Battery, Activity, Bot, ArrowRight, LoaderPinwheel } from "lucide-react";
+import { Settings, Battery, Activity, Bot, ArrowRight, LoaderPinwheel, Wrench } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
+import { DeviceSettingsDialog } from "./device-settings-dialog";
 
 interface BaseDeviceCardProps {
   id: string;
@@ -14,6 +16,8 @@ interface BaseDeviceCardProps {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+  deviceSettingsContent?: React.ReactNode;
+  deviceSettingsTitle?: string;
 }
 
 const deviceIcons: Record<DeviceType, React.ElementType> = {
@@ -54,12 +58,10 @@ const statusColors: Record<DeviceStatus, { bg: string; text: string; glow: strin
   auto: {
     bg: "bg-gradient-to-br from-cyan-600/20 to-cyan-600/10",
     text: "text-cyan-500",
-    // glow: "card-running-glow"
     glow: ""
   },
 };
 
-// Get card animation based on status (same pattern as station card)
 const getDeviceCardAnimation = (status: DeviceStatus) => {
   switch (status) {
     case "error":
@@ -77,13 +79,22 @@ export function BaseDeviceCard({
   children,
   onClick,
   className,
+  deviceSettingsContent,
+  deviceSettingsTitle,
 }: BaseDeviceCardProps) {
   const DeviceIcon = deviceIcons[type];
-  // Use status colors or fallback to 'stopped' for unknown statuses
   const colors = statusColors[status] || statusColors.stopped;
   const cardAnimation = getDeviceCardAnimation(status);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const openDialog = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDialogOpen(true);
+  };
+
   return (
+    <>
     <div
       onClick={onClick}
       className={cn(
@@ -105,11 +116,33 @@ export function BaseDeviceCard({
             )}
           </div>
         </div>
-        <StatusBadge status={status} size="sm" />
+        <div className="flex items-center gap-1.5">
+          {deviceSettingsContent && (
+            <button
+              onClick={openDialog}
+              className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[hsl(var(--text-muted))] hover:text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all duration-200"
+            >
+              <Wrench className="w-4 h-4" />
+              <span className="text-xs font-medium hidden sm:inline">Settings</span>
+            </button>
+          )}
+          <StatusBadge status={status} size="sm" />
+        </div>
       </div>
 
       {/* Content */}
       <div>{children}</div>
     </div>
+
+    {deviceSettingsContent && (
+      <DeviceSettingsDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={deviceSettingsTitle ?? name}
+      >
+        {deviceSettingsContent}
+      </DeviceSettingsDialog>
+    )}
+    </>
   );
 }

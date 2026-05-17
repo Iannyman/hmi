@@ -1,4 +1,5 @@
 export { BaseDeviceCard } from "./base-device-card";
+export { DeviceSettingsDialog } from "./device-settings-dialog";
 export { ConveyorCard } from "./conveyor-card";
 export { CylinderCard } from "./cylinder-card";
 export { DriveCard } from "./drive-card";
