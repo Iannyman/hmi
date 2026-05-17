@@ -20,11 +20,11 @@ interface DriveCardProps {
 export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
   const hasError = !!drive.errorMessage;
 
-    // Refactor station name
+  // Refactor station name
   const stationName = drive.stationId.replace(/_/g, ' ');
 
   // Disable cylinder controls when station is in automatic mode
-  const isStationAuto = stationStatus === "auto" ;  
+  const isStationAuto = stationStatus === "auto";
 
   // Local state for position index input with debouncing 
   const [positionIndexValue, setPositionIndexValue] = useState(drive.targetPositionIndex ?? 0);
@@ -70,19 +70,19 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
     if (!drive.stationId) return;
     const result = await startPositioning(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start positioning:", result.error);
-  };  
+  };
 
   const handleJogPositive = async (value: boolean) => {
     if (!drive.stationId) return;
     const result = await jogPositive(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start jog positive:", result.error);
-  };    
+  };
 
   const handleJogNegative = async (value: boolean) => {
     if (!drive.stationId) return;
     const result = await jogNegative(drive.stationId, drive.id, value);
     if (!result.success) console.error("Failed to start jog negative:", result.error);
-  };    
+  };
 
   return (
     <BaseDeviceCard
@@ -93,8 +93,8 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
       location={stationName}
       onClick={onClick}
       className="w-full sm:min-w-[320px]"
-      longPressTitle={`${drive.name} — Position Teaching`}
-      longPressContent={
+      deviceSettingsTitle={`${drive.name} — Position Teaching`}
+      deviceSettingsContent={
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[hsl(var(--surface))] rounded-xl p-3 text-center border border-[hsl(var(--border))]">
@@ -116,7 +116,6 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
           </div>
 
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20">
-            <MapPin className="w-4 h-4 text-[hsl(var(--accent))]" />
             <span className="text-xs text-[hsl(var(--text-muted))]">Position teaching — coming soon</span>
           </div>
 
@@ -124,7 +123,6 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
             disabled
             className="w-full bg-gradient-to-r from-[hsl(var(--accent))] to-blue-600 text-white opacity-50 cursor-not-allowed"
           >
-            <Save className="w-4 h-4" />
             Save Current Position
           </Button>
         </div>
@@ -134,25 +132,25 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
       <div className="mb-3 sm:mb-4 md:mb-5 p-2 sm:p-3 md:p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))]">
         <p className="text-[10px] sm:text-xs text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold mb-2 sm:mb-3">Drive State</p>
         {/* Status indicator */}
-          <div className={cn(
-            "flex-1 min-w-0 p-2 sm:p-3 rounded-xl border-2 transition-all duration-200",
-            drive.axisMoving
-              ? "border-[hsl(var(--status-running))] bg-[hsl(var(--status-running))]/10"
-              : "border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]"
-          )}>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Move className={cn(
-                "w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0",
-                drive.axisMoving
-                  ? "text-[hsl(var(--status-running))]"
-                  : "text-[hsl(var(--text-muted))]"
-              )} />
-              <div className="flex flex-col min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-[hsl(var(--text))] truncate">{drive.axisMoving ? "Moving" : "Stopped"}</p>
-                <p className="text-[9px] sm:text-[10px] text-[hsl(var(--text-dim))] truncate">{" ... "}</p>
-              </div>
+        <div className={cn(
+          "flex-1 min-w-0 p-2 sm:p-3 rounded-xl border-2 transition-all duration-200",
+          drive.axisMoving
+            ? "border-[hsl(var(--status-running))] bg-[hsl(var(--status-running))]/10"
+            : "border-[hsl(var(--border))] bg-[hsl(var(--surface-2))]"
+        )}>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Move className={cn(
+              "w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0",
+              drive.axisMoving
+                ? "text-[hsl(var(--status-running))]"
+                : "text-[hsl(var(--text-muted))]"
+            )} />
+            <div className="flex flex-col min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-[hsl(var(--text))] truncate">{drive.axisMoving ? "Moving" : "Stopped"}</p>
+              <p className="text-[9px] sm:text-[10px] text-[hsl(var(--text-dim))] truncate">{" ... "}</p>
             </div>
           </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
