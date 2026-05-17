@@ -26,9 +26,12 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
   // Disable cylinder controls when station is in automatic mode
   const isStationAuto = stationStatus === "auto";
 
-  // Local state for position index input with debouncing 
+  // Local state for position index input with debouncing
   const [positionIndexValue, setPositionIndexValue] = useState(drive.targetPositionIndex ?? 0);
   const positionIndexDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Local state for new position value in settings dialog
+  const [newPositionValue, setNewPositionValue] = useState<string>("");
 
   // Sync position index when drive data changes
   useEffect(() => {
@@ -105,24 +108,41 @@ export function DriveCard({ drive, stationStatus, onClick }: DriveCardProps) {
               <p className="text-xl font-bold font-mono text-gradient">{drive.actPosition}</p>
               <p className="text-[10px] text-[hsl(var(--text-muted))]">mm</p>
             </div>
-            <div className="bg-[hsl(var(--surface))] rounded-xl p-3 text-center border border-[hsl(var(--border))]">
+            <div className="bg-[hsl(var(--surface))] rounded-xl p-3 border border-[hsl(var(--border))]">
               <div className="flex items-center justify-center gap-1.5 mb-1.5">
                 <Target className="w-4 h-4 text-[hsl(var(--text-muted))]" />
                 <span className="text-[10px] text-[hsl(var(--text-dim))] uppercase tracking-wider font-semibold">Index</span>
               </div>
-              <p className="text-xl font-bold font-mono text-gradient">{drive.actPositionIndex}</p>
-              <p className="text-[10px] text-[hsl(var(--text-muted))]">#</p>
+              <Input
+                value={positionIndexValue}
+                onChange={handlePositionIndexChange}
+                variant="fault"
+                size="sm"
+                validation="number"
+                min={1}
+                max={10000}
+                placeholder="#"
+              />
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20">
-            <span className="text-xs text-[hsl(var(--text-muted))]">Position teaching — coming soon</span>
+          <div className="bg-[hsl(var(--surface))] rounded-xl p-3 border border-[hsl(var(--border))]">
+            <label className="block text-sm font-medium text-[hsl(var(--text-muted))] mb-2">New Position Value</label>
+            <Input
+              value={newPositionValue}
+              onChange={(v) => setNewPositionValue(v)}
+              variant="fault"
+              size="sm"
+              validation="number"
+              placeholder="mm"
+            />
           </div>
 
           <Button
             disabled
             className="w-full bg-gradient-to-r from-[hsl(var(--accent))] to-blue-600 text-white opacity-50 cursor-not-allowed"
           >
+            <Save className="w-4 h-4" />
             Save Current Position
           </Button>
         </div>
