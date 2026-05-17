@@ -5,7 +5,7 @@ import type { DeviceType, DeviceStatus } from "@/types/device.types";
 import { Settings, Battery, Activity, Bot, ArrowRight, LoaderPinwheel, Wrench } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import { DeviceLongPressDialog } from "./device-long-press-dialog";
+import { DeviceSettingsDialog } from "./device-settings-dialog";
 
 interface BaseDeviceCardProps {
   id: string;
@@ -135,13 +135,13 @@ export function BaseDeviceCard({
     </div>
 
     {deviceSettingsContent && (
-      <DeviceLongPressDialog
+      <DeviceSettingsDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         title={deviceSettingsTitle ?? name}
       >
         {deviceSettingsContent}
-      </DeviceLongPressDialog>
+      </DeviceSettingsDialog>
     )}
     </>
   );
