@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import type { DeviceType, DeviceStatus } from "@/types/device.types";
-import { Settings, Battery, Activity, Bot, ArrowRight, LoaderPinwheel } from "lucide-react";
+import { Settings, Battery, Activity, Bot, ArrowRight, LoaderPinwheel, Wrench } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import { useLongPress } from "@/hooks/use-long-press";
 import { DeviceLongPressDialog } from "./device-long-press-dialog";
 
 interface BaseDeviceCardProps {
@@ -17,8 +16,8 @@ interface BaseDeviceCardProps {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
-  longPressContent?: React.ReactNode;
-  longPressTitle?: string;
+  deviceSettingsContent?: React.ReactNode;
+  deviceSettingsTitle?: string;
 }
 
 const deviceIcons: Record<DeviceType, React.ElementType> = {
@@ -59,12 +58,10 @@ const statusColors: Record<DeviceStatus, { bg: string; text: string; glow: strin
   auto: {
     bg: "bg-gradient-to-br from-cyan-600/20 to-cyan-600/10",
     text: "text-cyan-500",
-    // glow: "card-running-glow"
     glow: ""
   },
 };
 
-// Get card animation based on status (same pattern as station card)
 const getDeviceCardAnimation = (status: DeviceStatus) => {
   switch (status) {
     case "error":
@@ -82,31 +79,26 @@ export function BaseDeviceCard({
   children,
   onClick,
   className,
-  longPressContent,
-  longPressTitle,
+  deviceSettingsContent,
+  deviceSettingsTitle,
 }: BaseDeviceCardProps) {
   const DeviceIcon = deviceIcons[type];
   const colors = statusColors[status] || statusColors.stopped;
   const cardAnimation = getDeviceCardAnimation(status);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const hasLongPress = longPressContent !== undefined;
 
-  const { handlers: longPressHandlers, isPressed } = useLongPress({
-    delay: 500,
-    onLongPress: hasLongPress ? () => setIsDialogOpen(true) : () => {},
-    onPress: hasLongPress ? onClick : undefined,
-    moveThreshold: 10,
-  });
+  const openDialog = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDialogOpen(true);
+  };
 
   return (
     <>
     <div
-      {...(hasLongPress ? longPressHandlers : {})}
-      onClick={hasLongPress ? undefined : onClick}
+      onClick={onClick}
       className={cn(
-        "card card-hover p-3 sm:p-4 md:p-5 pb-4 sm:pb-5 md:pb-6 cursor-pointer group transition-transform",
-        isPressed && hasLongPress && "scale-[0.98] opacity-90",
+        "card card-hover p-3 sm:p-4 md:p-5 pb-4 sm:pb-5 md:pb-6 cursor-pointer group",
         cardAnimation,
         className
       )}
@@ -124,20 +116,30 @@ export function BaseDeviceCard({
             )}
           </div>
         </div>
-        <StatusBadge status={status} size="sm" />
+        <div className="flex items-center gap-1.5">
+          {deviceSettingsContent && (
+            <button
+              onClick={openDialog}
+              className="p-1.5 rounded-lg text-[hsl(var(--text-muted))] hover:text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all duration-200"
+            >
+              <Wrench className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <StatusBadge status={status} size="sm" />
+        </div>
       </div>
 
       {/* Content */}
       <div>{children}</div>
     </div>
 
-    {hasLongPress && (
+    {deviceSettingsContent && (
       <DeviceLongPressDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        title={longPressTitle ?? name}
+        title={deviceSettingsTitle ?? name}
       >
-        {longPressContent}
+        {deviceSettingsContent}
       </DeviceLongPressDialog>
     )}
     </>
