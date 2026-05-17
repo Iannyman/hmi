@@ -17,7 +17,7 @@
   "runArgs": [
     "--publish",
     "4000:3000",
-    "--name=dev-${localWorkspaceFolderBasename}",
+    "--name=${localWorkspaceFolderBasename}-development",
     "--env-file",
     ".env"
   ],
