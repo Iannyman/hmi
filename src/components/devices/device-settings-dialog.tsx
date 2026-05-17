@@ -2,14 +2,14 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-interface DeviceLongPressDialogProps {
+interface DeviceSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   children: React.ReactNode;
 }
 
-export function DeviceLongPressDialog({ open, onOpenChange, title, children }: DeviceLongPressDialogProps) {
+export function DeviceSettingsDialog({ open, onOpenChange, title, children }: DeviceSettingsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[hsl(var(--surface-1))] border-[hsl(var(--border))]">
