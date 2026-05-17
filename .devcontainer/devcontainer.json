@@ -7,15 +7,17 @@
   "workspaceFolder": "/app",
   "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
   "mounts": [
-    "source=${localWorkspaceFolderBasename}_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+    "source=${localWorkspaceFolderBasename}_devcontainer_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    // Share Claude Code auth + config from LXC host into dev container
+    "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,consistency=cached"
   ],
   "forwardPorts": [
     4000
   ],
-  // "postCreateCommand": "npm install --legacy-peer-deps",
+  "postCreateCommand": "npm install --legacy-peer-deps && ln -sfn /root/.claude/projects/-opt-apps-hmi /root/.claude/projects/-app",
   "runArgs": [
     "--publish",
-    "4000:4000",
+    "4000:3000",
     "--name=dev-${localWorkspaceFolderBasename}",
     "--env-file",
     ".env"
@@ -25,7 +27,8 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
-        "ms-vscode.vscode-typescript-next"
+        "ms-vscode.vscode-typescript-next",
+        "anthropic.claude-code"
       ],
       "settings": {
         "js/ts.tsdk.path": "/app/node_modules/typescript/lib"
